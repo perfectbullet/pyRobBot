@@ -19,14 +19,16 @@ def browser_chat(args):
     """Run the chat on the browser."""
     ChatOptions.from_cli_args(args).export(fpath=GeneralDefinitions.PARSED_ARGS_FILE)
     try:
-        subprocess.run(
-            [  # noqa: S603, S607
+        subprocess_args = [  # noqa: S603, S607
                 "streamlit",
                 "run",
                 GeneralDefinitions.APP_PATH.as_posix(),
                 "--",
                 GeneralDefinitions.PARSED_ARGS_FILE.as_posix(),
-            ],
+            ]
+        print('subprocess_args is {}'.format(subprocess_args))
+        subprocess.run(
+            subprocess_args,
             cwd=GeneralDefinitions.APP_DIR.as_posix(),
             check=True,
         )
