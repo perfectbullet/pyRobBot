@@ -21,7 +21,11 @@ class OpenAiClientWrapper(openai.OpenAI):
 
     def __init__(self, *args, private_mode: bool = False, **kwargs):
         """Initialize the OpenAI API client wrapper."""
-        super().__init__(*args, **kwargs)
+        base_url = 'http://125.69.16.175:11434/v1'
+        api_key = 'ollama'  # required, but unused
+        kwargs['base_url'] = base_url
+        kwargs['api_key'] = api_key
+        super().__init__(**kwargs)
         self.private_mode = private_mode
 
         self.required_cache_files = [
@@ -94,7 +98,7 @@ def make_api_chat_completion_call(conversation: list, chat_obj: "Chat"):
         conversation,
     )
 
-    @retry(error_msg="Problems connecting to OpenAI API")
+    @retry(max_n_attempts=2, error_msg="Problems connecting to OpenAI API")
     def stream_reply(conversation, **api_call_args):
         # Update the chat's token usage database with tokens used in chat input
         # Do this here because every attempt consumes tokens, even if it fails
