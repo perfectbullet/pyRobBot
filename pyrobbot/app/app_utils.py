@@ -139,7 +139,10 @@ class AsyncReplier:
                 exchange_id=chunk.exchange_id
             )
         )
-        full_audio_fpath = history_entry_for_this_reply["reply_audio_file_path"].iloc[0]
+        try:
+            full_audio_fpath = history_entry_for_this_reply["reply_audio_file_path"].iloc[0]
+        except:
+            full_audio_fpath = None
         if full_audio_fpath is None:
             logger.warning("Path to full audio file not available")
         else:

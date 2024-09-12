@@ -218,7 +218,7 @@ class Chat(AlternativeConstructors):
     @property
     def initial_greeting(self):
         """Return the initial greeting for the chat."""
-        default_greeting = f"Hi! I'm {self.assistant_name}. How can I assist you?"
+        default_greeting = f"你好! 我是 {self.assistant_name}. 请问有什么需要帮助的?"
         user_set_greeting = False
         with contextlib.suppress(AttributeError):
             user_set_greeting = self._initial_greeting != ""
