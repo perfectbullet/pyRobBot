@@ -27,6 +27,7 @@ def browser_chat(args):
                 GeneralDefinitions.PARSED_ARGS_FILE.as_posix(),
             ]
         print('subprocess_args is {}'.format(subprocess_args))
+        print('subprocess cmd is {}'.format(' '.join(subprocess_args)))
         subprocess.run(
             subprocess_args,
             cwd=GeneralDefinitions.APP_DIR.as_posix(),

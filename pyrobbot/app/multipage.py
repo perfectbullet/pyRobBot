@@ -277,7 +277,8 @@ handle_stt_thread = threading.Thread(
 
 
 class AbstractMultipageApp(ABC):
-    """Framework for creating streamlite multipage apps.
+    """
+    Framework for creating streamlite multipage apps.
 
     Adapted from:
     <https://towardsdatascience.com/
@@ -476,7 +477,8 @@ class AbstractMultipageApp(ABC):
 
 
 class MultipageChatbotApp(AbstractMultipageApp):
-    """A Streamlit multipage app specifically for chatbot interactions.
+    """
+    A Streamlit multipage app specifically for chatbot interactions.
 
     Inherits from AbstractMultipageApp and adds chatbot-specific functionalities.
 
