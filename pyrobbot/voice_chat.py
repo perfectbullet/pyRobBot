@@ -449,7 +449,7 @@ class VoiceChat(Chat):
 
     def handle_tts_conversion_queue(self, tts_conversion_queue: queue.Queue):
         """Handle the text-to-speech queue."""
-        logger.debug("Chat {}: TTS conversion handler started.", self.id)
+        logger.info("Chat {}: TTS conversion handler started.", self.id)
         while not self.exit_chat.is_set():
             try:
                 tts_entry = tts_conversion_queue.get()
