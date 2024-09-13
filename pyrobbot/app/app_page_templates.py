@@ -244,8 +244,9 @@ class ChatBotPage(AppPage):
     @property
     def chat_history(self) -> list[dict[str, str]]:
         """Return the chat history of the page."""
-        if "messages" not in self.state:
-            self.state["messages"] = []
+        # if "messages" not in self.state:
+        #     self.state["messages"] = []
+        self.state["messages"] = []
         return self.state["messages"]
 
     def render_chat_history(self):
@@ -263,7 +264,9 @@ class ChatBotPage(AppPage):
                         st.caption(message["chat_model"])
                     else:
                         st.caption(message["timestamp"])
-                st.markdown(message["content"])
+                message_content = message["content"]
+                print('message_content is {}'.format(message_content))
+                st.markdown(message_content)
                 with contextlib.suppress(KeyError):
                     if audio := message.get("reply_audio_file_path"):
                         with contextlib.suppress(CouldntDecodeError):
