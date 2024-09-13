@@ -7,7 +7,7 @@ import typing
 from getpass import getuser
 from pathlib import Path
 from typing import Literal, Optional, get_args, get_origin
-
+from loguru import logger
 from pydantic import BaseModel, Field
 
 from . import GeneralDefinitions
@@ -78,8 +78,13 @@ class BaseConfigModel(BaseModel, extra="forbid"):
     @classmethod
     def from_file(cls, fpath: Path):
         """Return an instance of the class given configs stored in a json file."""
+        logger.info('fpath is {}'.format(fpath))
         with open(fpath, "r") as configs_file:
-            return cls.model_validate(json.load(configs_file))
+            data = json.load(configs_file)
+            data['context_model'] = 'full-history'
+            data['initial_greeting'] = '你好'
+            logger.info('data is {}'.format(data))
+            return cls.model_validate(data)
 
 
 class OpenAiApiCallOptions(BaseConfigModel):
@@ -126,7 +131,7 @@ class ChatOptions(OpenAiApiCallOptions):
     )
     ai_instructions: tuple[str, ...] = Field(
         default=(
-            "你回答正确。",
+            "准确回答",
             "除非明确要求，否则你不会撒谎或编造信息。",
         ),
         description="Initial instructions for the AI",
@@ -153,7 +158,7 @@ class ChatOptions(OpenAiApiCallOptions):
         description="Maximum number of attempts to connect to the OpenAI API",
     )
     language: str = Field(
-        default="en",
+        default="zh",
         description="Initial language adopted by the assistant. Use either the ISO-639-1 "
         "format (e.g. 'pt'), or an RFC5646 language tag (e.g. 'pt-br').",
     )
