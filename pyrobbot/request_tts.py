@@ -5,11 +5,15 @@ import io
 from loguru import logger
 from pydub import AudioSegment
 
+from clear_text import clear_text
+
 emotivoice_url = "http://127.0.0.1:9875/v1/audio/speech"
 
 
 def tts_request(text: str, speaker_id: int, url: str, prompt=''):
     logger.info('tts text is {}'.format(text))
+    text = clear_text(text)
+    logger.info('tts new text is {}'.format(text))
     payload = json.dumps({
         "input": text,
         "voice": str(speaker_id),
