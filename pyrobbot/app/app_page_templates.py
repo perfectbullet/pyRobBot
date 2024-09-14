@@ -401,7 +401,7 @@ class ChatBotPage(AppPage):
                     self.state.update({"chat_started": True})
                     # Display user message in chat message container
                     with st.chat_message("user", avatar=self.avatars["user"]):
-                        st.caption(time_now)
+                        st.caption('现在时间:{}'.format(time_now))
                         st.markdown(prompt)
                     self.chat_history.append(
                         {

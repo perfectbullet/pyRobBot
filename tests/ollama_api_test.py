@@ -7,7 +7,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-  model="llama3",
+  model="Llama3-8B-Chinese-Chat:latest",
   messages=[
     {"role": "system", "content": "中文回复"},
     {"role": "assistant", "content": "你是一个ai助手"},

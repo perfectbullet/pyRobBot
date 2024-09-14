@@ -109,7 +109,7 @@ class AsyncReplier:
                 self.app_page.status_msg_container.empty()
 
     def stream_text_and_audio_reply(self):
-        """Stream the text and audio reply to the display."""
+        """将文本和音频回复流式传输到显示器。"""
         text_reply_container = st.empty()
         audio_reply_container = st.empty()
 
@@ -126,22 +126,21 @@ class AsyncReplier:
                     full_response += chunk.content
                     text_reply_container.markdown(full_response + "▌")
                 self.question_answer_chunks_queue.task_done()
-
-        text_reply_container.caption(datetime.datetime.now().replace(microsecond=0))
+        # seems to
+        # text_reply_container.caption(datetime.datetime.now().replace(microsecond=0))
         text_reply_container.markdown(full_response)
 
-        logger.debug("Waiting for the audio reply to finish...")
+        logger.info("Waiting for the audio reply to finish...")
         self.chat_obj.play_speech_queue.join()
 
-        logger.debug("Getting path to full audio file for the reply...")
-        history_entry_for_this_reply = (
-            self.chat_obj.context_handler.database.retrieve_history(
-                exchange_id=chunk.exchange_id
-            )
+        logger.info("Getting path to full audio file for the reply...")
+        history_entry_for_this_reply = self.chat_obj.context_handler.database.retrieve_history(
+            exchange_id=chunk.exchange_id
         )
-        try:
-            logger.info('history_entry_for_this_reply["reply_audio_file_path"] is {}', history_entry_for_this_reply["reply_audio_file_path"])
 
+        try:
+            logger.info('history_entry_for_this_reply[reply_audio_file_path][0] is {}',
+                        history_entry_for_this_reply["reply_audio_file_path"].iloc[0])
             full_audio_fpath = history_entry_for_this_reply["reply_audio_file_path"].iloc[0]
         except Exception as e:
             logger.exception(e)
