@@ -1,8 +1,9 @@
 from openai import OpenAI
 
 client = OpenAI(
-    base_url = 'http://125.69.16.175:11434/v1',
-    api_key='ollama', # required, but unused
+    base_url='http://125.69.16.175:11434/v1',
+    # required, but unused
+    api_key='ollama',
 )
 
 response = client.chat.completions.create(

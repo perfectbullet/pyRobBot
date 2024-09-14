@@ -531,7 +531,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
         """Create an input element for the OpenAI API key."""
         self.openai_api_key = st.text_input(
             label="OpenAI API Key (required)",
-            value=os.environ.get("OPENAI_API_KEY", ""),
+            value=os.environ.get("OPENAI_API_KEY", "ollama"),
             placeholder="Enter your OpenAI API key",
             key="openai_api_key",
             type="password",
@@ -593,7 +593,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
             field_names += list(VoiceChatConfigs.model_fields)
             field_names = list(dict.fromkeys(field_names))
             model_fields = {k: VoiceChatConfigs.model_fields[k] for k in field_names}
-
+            logger.info('model_fields is {}', model_fields)
             updates_to_chat_configs = self._handle_chat_configs_value_selection(
                 current_chat_configs, model_fields
             )
@@ -617,15 +617,15 @@ class MultipageChatbotApp(AbstractMultipageApp):
         with st.sidebar:
             _left_col, centre_col, _right_col = st.columns([0.33, 0.34, 0.33])
             with centre_col:
-                st.title(GeneralDefinitions.APP_NAME)
+                st.title('观想科技AI')
                 with contextlib.suppress(AttributeError, ValueError, OSError):
                     # st image raises some exceptions occasionally
                     avatars = get_avatar_images()
                     st.image(avatars["assistant"], use_column_width=True)
             st.subheader(
-                GeneralDefinitions.PACKAGE_DESCRIPTION,
+                '语音对话GPT LLM\nPowered by 观想科技',
                 divider="rainbow",
-                help="https://github.com/paulovcmedeiros/pyRobBot",
+                help="https://github.com/paulovcmedeiros/pyRobBot2222222222",
             )
 
             self.create_api_key_element()

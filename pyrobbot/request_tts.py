@@ -5,7 +5,7 @@ import io
 from loguru import logger
 from pydub import AudioSegment
 
-from clear_text import clear_text
+from pyrobbot.clear_text import clear_text
 
 emotivoice_url = "http://127.0.0.1:9875/v1/audio/speech"
 
