@@ -364,13 +364,19 @@ class Chat(AlternativeConstructors):
     ):
         """Yield response from a prompt message (lower level interface)."""
         # Get appropriate context for prompt from the context handler
+        logger.info('prompt_msg is {}'.format(prompt_msg))
         context = self.context_handler.get_context(msg=prompt_msg)
+        logger.info('context is {}'.format(context))
+        logger.info('self.base_directive is {}'.format(self.base_directive))
 
         # Make API request and yield response chunks
         full_reply_content = ""
         for chunk in make_api_chat_completion_call(
-            conversation=[self.base_directive, *context, prompt_msg], chat_obj=self
+                conversation=[self.base_directive, prompt_msg], chat_obj=self
         ):
+        # for chunk in make_api_chat_completion_call(
+        #     conversation=[self.base_directive, *context, prompt_msg], chat_obj=self
+        # ):
             full_reply_content += chunk.strip(self._code_marker)
             yield chunk
 
@@ -469,12 +475,11 @@ class Chat(AlternativeConstructors):
 
     def _translate(self, text):
         lang = self.language
-
         cached_translation = type(self)._translation_cache[text].get(lang)  # noqa SLF001
         if cached_translation:
             return cached_translation
 
-        logger.debug("Processing translation of '{}' to '{}'...", text, lang)
+        logger.info("Processing translation of '{}' to '{}'...", text, lang)
         translation_prompt = (
             f"Translate the text between triple quotes below to {lang}. "
             "DO NOT WRITE ANYTHING ELSE. Only the translation. "

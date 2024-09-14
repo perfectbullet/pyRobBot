@@ -454,7 +454,7 @@ class VoiceChat(Chat):
             try:
                 tts_entry = tts_conversion_queue.get()
                 if tts_entry["text"] is None:
-                    # Signal that the current anwer is finished
+                    # Signal that the current answer is finished
                     play_speech_queue_item = {
                         "exchange_id": tts_entry["exchange_id"],
                         "speech": None,
@@ -497,9 +497,10 @@ class VoiceChat(Chat):
                 # Pay attention to the indentation level
                 tts_conversion_queue.task_done()
 
-            except Exception as error:  # noqa: BLE001
-                logger.opt(exception=True).debug(error)
-                logger.error(error)
+            except Exception as err:  # noqa: BLE001
+                logger.opt(exception=True).debug(err)
+                logger.error(err)
+                logger.exception(err)
         logger.error("TTS conversion queue handler ended.")
 
     def get_sound_file(self, wav_buffer: io.BytesIO, mode: str = "r"):

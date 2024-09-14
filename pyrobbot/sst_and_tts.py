@@ -15,7 +15,8 @@ from pydub import AudioSegment
 
 from .general_utils import retry
 from .tokens import TokenUsageDatabase
-
+from pyrobbot.whisper_service_utils import transcribe
+from pyrobbot.request_tts import tts_request, emotivoice_url
 
 @dataclass
 class SpeechAndTextConfigs:
@@ -25,7 +26,7 @@ class SpeechAndTextConfigs:
     general_token_usage_db: TokenUsageDatabase
     token_usage_db: TokenUsageDatabase
     engine: Literal["openai", "google"] = "google"
-    language: str = "en"
+    language: str = "zh"
     timeout: int = 10
 
 
@@ -109,15 +110,8 @@ class SpeechToText(SpeechAndTextConfigs):
         """Perform speech-to-text using OpenAI's API."""
         wav_buffer = io.BytesIO(self.audio_data.get_wav_data())
         wav_buffer.name = "audio.wav"
-        with wav_buffer as audio_file_buffer:
-            transcript = self.openai_client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file_buffer,
-                language=self.language.split("-")[0],  # put in ISO-639-1 format
-                prompt=f"The language is {self.language}. "
-                "Do not transcribe if you think the audio is noise.",
-            )
-
+        logger.info('self.language is {}'.format(self.language))
+        txt = transcribe(wav_buffer)
         for db in [
             self.general_token_usage_db,
             self.token_usage_db,
@@ -126,8 +120,31 @@ class SpeechToText(SpeechAndTextConfigs):
                 model="whisper-1",
                 n_input_tokens=int(np.ceil(self.speech.duration_seconds)),
             )
+        return txt
 
-        return transcript.text
+    # @retry()
+    # def _stt_openai(self):
+    #     """Perform speech-to-text using OpenAI's API."""
+    #     wav_buffer = io.BytesIO(self.audio_data.get_wav_data())
+    #     wav_buffer.name = "audio.wav"
+    #     logger.info('self.language is {}'.format(self.language))
+    #     with wav_buffer as audio_file_buffer:
+    #         transcript = self.openai_client.audio.transcriptions.create(
+    #             model="whisper-1",
+    #             file=audio_file_buffer,
+    #             language=self.language.split("-")[0],  # put in ISO-639-1 format
+    #             prompt=f"The language is {self.language}. "
+    #             "Do not transcribe if you think the audio is noise.",
+    #         )
+    #     for db in [
+    #         self.general_token_usage_db,
+    #         self.token_usage_db,
+    #     ]:
+    #         db.insert_data(
+    #             model="whisper-1",
+    #             n_input_tokens=int(np.ceil(self.speech.duration_seconds)),
+    #         )
+    #     return transcript.text
 
     def _stt_google(self):
         """Perform speech-to-text using Google's API."""
@@ -150,56 +167,74 @@ class TextToSpeech(SpeechAndTextConfigs):
     @property
     def speech(self) -> AudioSegment:
         """Return the speech from the text."""
+        print('speech, speech, speech, speech, speech, speech, ')
         if not self._speech:
             self._speech = self._tts()
         return self._speech
 
     def set_sample_rate(self, sample_rate: int):
         """Set the sample rate of the speech."""
+        logger.info('sample_rate is {}'.format(sample_rate))
         self._speech = self.speech.set_frame_rate(sample_rate)
 
     def _tts(self):
-        logger.debug("Running {} TTS on text '{}'", self.engine, self.text)
-        rtn = self._tts_openai() if self.engine == "openai" else self._tts_google()
-        logger.debug("Done with TTS for '{}'", self.text)
+        logger.info("Running {} TTS on text '{}'", self.engine, self.text)
+        # rtn = self._tts_openai() if self.engine == "openai" else self._tts_google()
+        rtn = self._tts_openai()
+        logger.info("Done with TTS for '{}'", self.text)
 
         return rtn
+
+    # def _tts_openai(self) -> AudioSegment:
+    #     """Convert text to speech using OpenAI's TTS. Return an AudioSegment object."""
+    #     openai_tts_model = "tts-1"
+    #
+    #     @retry()
+    #     def _create_speech(*args, **kwargs):
+    #         for db in [
+    #             self.general_token_usage_db,
+    #             self.token_usage_db,
+    #         ]:
+    #             db.insert_data(model=openai_tts_model, n_input_tokens=len(self.text))
+    #         return self.openai_client.audio.speech.create(*args, **kwargs)
+    #
+    #     response = _create_speech(
+    #         input=self.text,
+    #         model=openai_tts_model,
+    #         voice=self.openai_tts_voice,
+    #         response_format="mp3",
+    #         timeout=self.timeout,
+    #     )
+    #
+    #     mp3_buffer = io.BytesIO()
+    #     for mp3_stream_chunk in response.iter_bytes(chunk_size=4096):
+    #         mp3_buffer.write(mp3_stream_chunk)
+    #     mp3_buffer.seek(0)
+    #
+    #     audio = AudioSegment.from_mp3(mp3_buffer)
+    #     audio += 8  # Increase volume a bit
+    #     return audio
 
     def _tts_openai(self) -> AudioSegment:
         """Convert text to speech using OpenAI's TTS. Return an AudioSegment object."""
         openai_tts_model = "tts-1"
-
-        @retry()
-        def _create_speech(*args, **kwargs):
-            for db in [
-                self.general_token_usage_db,
-                self.token_usage_db,
-            ]:
-                db.insert_data(model=openai_tts_model, n_input_tokens=len(self.text))
-            return self.openai_client.audio.speech.create(*args, **kwargs)
-
-        response = _create_speech(
-            input=self.text,
-            model=openai_tts_model,
-            voice=self.openai_tts_voice,
-            response_format="mp3",
-            timeout=self.timeout,
-        )
-
-        mp3_buffer = io.BytesIO()
-        for mp3_stream_chunk in response.iter_bytes(chunk_size=4096):
-            mp3_buffer.write(mp3_stream_chunk)
+        response = tts_request(self.text, 1018, emotivoice_url, prompt='开心')
+        mp3_buffer = io.BytesIO(response.content)
+        # for mp3_stream_chunk in response.iter_bytes(chunk_size=4096):
+        #     mp3_buffer.write(mp3_stream_chunk)
         mp3_buffer.seek(0)
 
         audio = AudioSegment.from_mp3(mp3_buffer)
         audio += 8  # Increase volume a bit
+        # logger.info('audio is {}'.format(audio))
         return audio
 
-    def _tts_google(self) -> AudioSegment:
-        """Convert text to speech using Google's TTS. Return a WAV BytesIO object."""
-        tts = gTTS(self.text, lang=self.language)
-        mp3_buffer = io.BytesIO()
-        tts.write_to_fp(mp3_buffer)
-        mp3_buffer.seek(0)
-
-        return AudioSegment.from_mp3(mp3_buffer)
+    # def _tts_google(self) -> AudioSegment:
+    #     """Convert text to speech using Google's TTS. Return a WAV BytesIO object."""
+    #     logger.info('self.language is {}'.format(self.language))
+    #     tts = gTTS(self.text, lang=self.language)
+    #     mp3_buffer = io.BytesIO()
+    #     tts.write_to_fp(mp3_buffer)
+    #     mp3_buffer.seek(0)
+    #
+    #     return AudioSegment.from_mp3(mp3_buffer)

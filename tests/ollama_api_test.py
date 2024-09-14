@@ -8,10 +8,11 @@ client = OpenAI(
 response = client.chat.completions.create(
   model="llama3",
   messages=[
-    {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "Who won the world series in 2020?"},
-    {"role": "assistant", "content": "The LA Dodgers won in 2020."},
-    {"role": "user", "content": "Where was it played?"}
+    {"role": "system", "content": "中文回复"},
+    {"role": "assistant", "content": "你是一个ai助手"},
+    {"role": "user", "content": "你好"},
+    # {"role": "assistant", "content": ""},
+    {"role": "user", "content": "如何理解复里叶变换"}
   ]
 )
 print(response.choices[0].message.content)
