@@ -100,7 +100,7 @@ def make_api_chat_completion_call(conversation: list, chat_obj: "Chat"):
 
     logger.info('conversation is {}, api_call_args is {}'.format(conversation, api_call_args))
 
-    @retry(max_n_attempts=2, error_msg="Problems connecting to OpenAI API")
+    @retry(max_n_attempts=5, error_msg="Problems connecting to OpenAI API")
     def stream_reply(conversation, **api_call_args):
         # Update the chat's token usage database with tokens used in chat input
         # Do this here because every attempt consumes tokens, even if it fails
@@ -124,5 +124,5 @@ def make_api_chat_completion_call(conversation: list, chat_obj: "Chat"):
         for db in [chat_obj.general_token_usage_db, chat_obj.token_usage_db]:
             db.insert_data(model=chat_obj.model, n_output_tokens=n_tokens)
 
-    logger.trace("Done with OpenAI API call")
+    logger.info("Done with OpenAI API call")
     yield from stream_reply(conversation, **api_call_args)
