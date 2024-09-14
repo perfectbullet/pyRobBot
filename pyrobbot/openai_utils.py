@@ -98,6 +98,8 @@ def make_api_chat_completion_call(conversation: list, chat_obj: "Chat"):
         conversation,
     )
 
+    logger.info('conversation is {}, api_call_args is {}'.format(conversation, api_call_args))
+
     @retry(max_n_attempts=2, error_msg="Problems connecting to OpenAI API")
     def stream_reply(conversation, **api_call_args):
         # Update the chat's token usage database with tokens used in chat input

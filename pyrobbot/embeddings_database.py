@@ -142,7 +142,9 @@ class EmbeddingsDatabase:
             file_path: Path to the assistant's reply audio file.
         """
         file_path = file_path.as_posix()
+        logger.info('file_path is {}'.format(file_path))
         conn = sqlite3.connect(self.db_path)
+        logger.info('db_path is {}'.format(self.db_path))
         with conn:
             # Check if the corresponding id exists in the messages table
             cursor = conn.cursor()
