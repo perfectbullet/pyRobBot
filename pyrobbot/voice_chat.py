@@ -100,6 +100,7 @@ class VoiceChat(Chat):
             args=(self.current_answer_audios_queue,),
             daemon=True,
         )
+        self.update_audio_history_ok = threading.Event()
 
     @property
     def mixer(self):
@@ -172,7 +173,7 @@ class VoiceChat(Chat):
 
         self.exit_chat.set()
         chime.info()
-        logger.debug("Leaving chat")
+        logger.info("Leaving chat")
 
     def answer_question(self, question: str):
         """Answer a question."""
@@ -232,16 +233,16 @@ class VoiceChat(Chat):
         merged_audios = defaultdict(AudioSegment.empty)
         while not self.exit_chat.is_set():
             try:
-                logger.debug("Waiting for reply audio chunks to concatenate and save...")
+                logger.info("Waiting for reply audio chunks to concatenate and save...")
                 audio_chunk_queue_item = current_answer_audios_queue.get()
                 reply_audio_chunk = audio_chunk_queue_item["speech"]
                 exchange_id = audio_chunk_queue_item["exchange_id"]
-                logger.debug("Received audio chunk for response ID {}", exchange_id)
+                logger.info("Received audio chunk for response ID {}", exchange_id)
 
                 if reply_audio_chunk is not None:
                     # Reply not yet finished
                     merged_audios[exchange_id] += reply_audio_chunk
-                    logger.debug(
+                    logger.info(
                         "Response ID {} audio: {}s so far",
                         exchange_id,
                         merged_audios[exchange_id].duration_seconds,
@@ -250,24 +251,25 @@ class VoiceChat(Chat):
                     continue
 
                 # Now the reply has finished
-                logger.debug(
+                logger.info(
                     "Creating a single audio file for response ID {}...", exchange_id
                 )
                 merged_audio = merged_audios[exchange_id]
                 # Update the chat history with the audio file path
                 fpath = self.audio_cache_dir() / f"{datetime.now().isoformat()}.mp3"
-                logger.debug("Updating chat history with audio file path {}", fpath)
+                logger.info("Updating chat history with audio file path {}", fpath)
                 self.context_handler.database.insert_assistant_audio_file_path(
                     exchange_id=exchange_id, file_path=fpath
                 )
                 # Save the combined audio as an mp3 file in the cache directory
                 merged_audio.export(fpath, format="mp3")
-                logger.debug("File {} stored", fpath)
+                logger.info("File {} stored", fpath)
                 del merged_audios[exchange_id]
                 current_answer_audios_queue.task_done()
             except Exception as error:  # noqa: BLE001
                 logger.error(error)
-                logger.opt(exception=True).debug(error)
+                logger.opt(exception=True).info(error)
+            self.update_audio_history_ok.set()
 
     def speak(self, tts: TextToSpeech):
         """Reproduce audio from a pygame Sound object."""

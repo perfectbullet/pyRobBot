@@ -131,16 +131,15 @@ class AsyncReplier:
         text_reply_container.markdown(full_response)
 
         logger.info("Waiting for the audio reply to finish...")
-        self.chat_obj.play_speech_queue.join()
-
+        # self.chat_obj.play_speech_queue.join()
+        # 如果标志为True将立即返回，否则阻塞线程至等待阻塞状态，等待其他线程调用set()
+        self.chat_obj.update_audio_history_ok.wait()
         logger.info("Getting path to full audio file for the reply...")
-        history_entry_for_this_reply = self.chat_obj.context_handler.database.retrieve_history(
-            exchange_id=chunk.exchange_id
-        )
-
         try:
-            logger.info('history_entry_for_this_reply[reply_audio_file_path][0] is {}',
-                        history_entry_for_this_reply["reply_audio_file_path"].iloc[0])
+            history_entry_for_this_reply = self.chat_obj.context_handler.database.retrieve_history(
+                exchange_id=chunk.exchange_id
+            )
+            logger.info('history_entry_for_this_reply is {}', history_entry_for_this_reply["reply_audio_file_path"].iloc[0])
             full_audio_fpath = history_entry_for_this_reply["reply_audio_file_path"].iloc[0]
         except Exception as e:
             logger.exception(e)
@@ -152,7 +151,8 @@ class AsyncReplier:
             self.app_page.render_custom_audio_player(
                 full_audio_fpath, parent_element=audio_reply_container, autoplay=False
             )
-
+        # 将标志设为False
+        self.chat_obj.update_audio_history_ok.clear()
         return {"text": full_response, "audio": full_audio_fpath}
 
 
