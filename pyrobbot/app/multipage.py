@@ -1,4 +1,6 @@
 """Code for the creation streamlit apps with dynamically created pages."""
+"""用于创建具有动态创建页面的流线型应用程序的代码。"""
+
 
 import contextlib
 import datetime
@@ -20,7 +22,6 @@ from pydub import AudioSegment
 from streamlit.runtime.scriptrunner import add_script_run_ctx
 from streamlit_webrtc import WebRtcMode
 
-from pyrobbot import GeneralDefinitions
 from pyrobbot.chat_configs import VoiceChatConfigs
 from pyrobbot.general_utils import trim_beginning
 from pyrobbot.openai_utils import OpenAiClientWrapper
@@ -44,6 +45,7 @@ reply_ongoing = threading.Event()
 @st.cache_resource(show_spinner="Initialising listening engine...")
 def listen():  # noqa: PLR0912, PLR0915
     """Listen for speech from the browser."""
+    """从浏览器中聆听语音。"""
     # This deque will be employed to keep a moving window of audio chunks to monitor
     # voice activity. The length of the deque is calculated such that the concatenated
     # audio chunks will produce an audio at most inactivity_timeout_seconds long
@@ -479,9 +481,10 @@ class AbstractMultipageApp(ABC):
 class MultipageChatbotApp(AbstractMultipageApp):
     """
     A Streamlit multipage app specifically for chatbot interactions.
-
     Inherits from AbstractMultipageApp and adds chatbot-specific functionalities.
 
+    Streamlit 多页应用，专门用于聊天机器人交互。
+    继承自 AbstractMultipageApp，并添加聊天机器人特定的功能。
     """
 
     @property

@@ -33,7 +33,7 @@ class WebAppChat(VoiceChat):
 
 
 class AsyncReplier:
-    """Asynchronously reply to a prompt and stream the text & audio reply."""
+    """异步回复提示并流式传输文本和音频回复。"""
 
     def __init__(self, app_page: "AppPage", prompt: str):
         """Initialize a new instance of the AsyncReplier class."""
