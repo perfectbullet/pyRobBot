@@ -175,13 +175,13 @@ class EmbeddingsDatabase:
         """
         if exchange_id:
             query += f" WHERE messages.id = '{exchange_id}'"
-        logger.info('query is:{}'.format(query))
+        # logger.info('query is:{}'.format(query))
         conn = sqlite3.connect(self.db_path)
         with conn:
             data_df = pd.read_sql_query(query, conn)
         conn.close()
-        logger.info('exchange_id: {}\n,data_df.head is:\n{}'
-                    .format(exchange_id, data_df.filter(items=['id', 'reply_audio_file_path'])))
+        # logger.info('exchange_id: {}\n,data_df.head is:\n{}'
+        #             .format(exchange_id, data_df[-1:].filter(items=['id', 'reply_audio_file_path'])))
         # logger.info('data_df is:\n{}'.format(data_df))
         return data_df
 
