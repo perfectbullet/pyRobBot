@@ -530,19 +530,19 @@ class MultipageChatbotApp(AbstractMultipageApp):
                 self.state["chat_configs"] = VoiceChatConfigs()
         return self.state["chat_configs"]
 
-    def create_api_key_element(self):
-        """Create an input element for the OpenAI API key."""
-        self.openai_api_key = st.text_input(
-            label="OpenAI API Key (required)",
-            value=os.environ.get("OPENAI_API_KEY", "ollama"),
-            placeholder="Enter your OpenAI API key",
-            key="openai_api_key",
-            type="password",
-            help="[OpenAI API auth key](https://platform.openai.com/account/api-keys). "
-            + "Chats created with this key won't be visible to people using other keys.",
-        )
-        if not self.openai_api_key:
-            st.write(":red[You need a valid key to use the chat]")
+    # def create_api_key_element(self):
+    #     """Create an input element for the OpenAI API key."""
+    #     self.openai_api_key = st.text_input(
+    #         label="OpenAI API Key (required)",
+    #         value=os.environ.get("OPENAI_API_KEY", "ollama"),
+    #         placeholder="Enter your OpenAI API key",
+    #         key="openai_api_key",
+    #         type="password",
+    #         help="[OpenAI API auth key](https://platform.openai.com/account/api-keys). "
+    #         + "Chats created with this key won't be visible to people using other keys.",
+    #     )
+    #     if not self.openai_api_key:
+    #         st.write(":red[You need a valid key to use the chat]")
 
     def add_page(
         self, page: ChatBotPage = None, selected: bool = True, **page_obj_kwargs
@@ -631,8 +631,8 @@ class MultipageChatbotApp(AbstractMultipageApp):
                 help="https://github.com/paulovcmedeiros/pyRobBot2222222222",
             )
 
-            self.create_api_key_element()
-
+            # self.create_api_key_element()
+            self.openai_api_key = 'ollama'
             # Create a sidebar with tabs for chats and settings
             tab1, tab2 = st.tabs(["Chats", "Settings for Current Chat"])
 
