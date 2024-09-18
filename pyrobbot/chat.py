@@ -245,16 +245,19 @@ class Chat(AlternativeConstructors):
 
     @property
     def initial_greeting(self):
-        """Return the initial greeting for the chat."""
-        default_greeting = "我是 Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。"
+        """
+        Return the initial greeting for the chat.
+        返回聊天的初始问候语。
+        """
+        default_greeting = "我是Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。"
         with contextlib.suppress(AttributeError):
             user_set_greeting = self._initial_greeting != ""
 
         if not user_set_greeting:
             self._initial_greeting = default_greeting
 
-        custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
-        logger.info('self.language {}', self.language)
+        # custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
+        # logger.info('self.language {}', self.language)
         # if custom_greeting or self.language[:2] != "en":
         #     self._initial_greeting = self._translate(self._initial_greeting)
         logger.info('_initial_greeting is {}', self._initial_greeting)
@@ -262,7 +265,7 @@ class Chat(AlternativeConstructors):
 
     @initial_greeting.setter
     def initial_greeting(self, value: str):
-        logger.info('value is {}', value)
+        # logger.info('value is {}', value)
         # Chat类的 init中， setattr(self, field, self._passed_configs[field])
         self._initial_greeting = str(value).strip()
 

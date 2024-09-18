@@ -149,7 +149,7 @@ class ChatOptions(OpenAiApiCallOptions):
         json_schema_extra={"frozen": True},
     )
     initial_greeting: Optional[str] = Field(
-        default="我是 Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。", description="Initial greeting given by the assistant"
+        default="我是Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。", description="Initial greeting given by the assistant"
     )
     private_mode: Optional[bool] = Field(
         default=False,
