@@ -39,11 +39,15 @@ class AssistantResponseChunk:
 
 
 class Chat(AlternativeConstructors):
-    """Manages conversations with an AI chat model.
-
+    """
+    Manages conversations with an AI chat model.
     This class encapsulates the chat behavior, including handling the chat context,
     managing cache directories, and interfacing with the OpenAI API for generating chat
     responses.
+
+    使用 AI 聊天模型管理对话。
+    此类封装了聊天行为，包括处理聊天上下文、
+    管理缓存目录以及与 OpenAI API 交互以生成聊天响应。
     """
 
     _translation_cache = defaultdict(dict)
@@ -54,8 +58,8 @@ class Chat(AlternativeConstructors):
         openai_client: OpenAiClientWrapper = None,
         configs: ChatOptions = default_configs,
     ):
-        """Initializes a chat instance.
-
+        """
+        Initializes a chat instance.
         Args:
             configs (ChatOptions, optional): The configurations for this chat session.
             openai_client (openai.OpenAI, optional): An OpenAiClientWrapper instance.
@@ -73,8 +77,9 @@ class Chat(AlternativeConstructors):
 
         self._passed_configs = configs
         for field in self._passed_configs.model_fields:
+            # 给对象赋值
+            logger.info('给对象赋值：{} set {} value {}', self, field, self._passed_configs[field])
             setattr(self, field, self._passed_configs[field])
-
         try:
             self.openai_client = (
                 openai_client
@@ -241,8 +246,7 @@ class Chat(AlternativeConstructors):
     @property
     def initial_greeting(self):
         """Return the initial greeting for the chat."""
-        default_greeting = f"你好! 我是 {self.assistant_name}. 请问有什么需要帮助的?"
-        user_set_greeting = False
+        default_greeting = "我是 Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。"
         with contextlib.suppress(AttributeError):
             user_set_greeting = self._initial_greeting != ""
 
@@ -250,13 +254,16 @@ class Chat(AlternativeConstructors):
             self._initial_greeting = default_greeting
 
         custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
-        if custom_greeting or self.language[:2] != "en":
-            self._initial_greeting = self._translate(self._initial_greeting)
-
+        logger.info('self.language {}', self.language)
+        # if custom_greeting or self.language[:2] != "en":
+        #     self._initial_greeting = self._translate(self._initial_greeting)
+        logger.info('_initial_greeting is {}', self._initial_greeting)
         return self._initial_greeting
 
     @initial_greeting.setter
     def initial_greeting(self, value: str):
+        logger.info('value is {}', value)
+        # Chat类的 init中， setattr(self, field, self._passed_configs[field])
         self._initial_greeting = str(value).strip()
 
     def respond_user_prompt(self, prompt: str, **kwargs):
@@ -306,7 +313,7 @@ class Chat(AlternativeConstructors):
     def start(self):
         """Start the chat."""
         # ruff: noqa: T201
-        print(f"{self.assistant_name}> {self.initial_greeting}\n")
+        logger.info(f"{self.assistant_name}> {self.initial_greeting}\n")
         try:
             while True:
                 question = input(f"{self.username}> ").strip()

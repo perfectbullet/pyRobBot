@@ -144,7 +144,8 @@ class AlternativeConstructors:
         Returns:
             cls: An instance of Chat initialized with the given configurations.
         """
-        return cls(configs=cls.default_configs.model_validate(configs), **kwargs)
+        new_config = cls.default_configs.model_validate(configs)
+        return cls(configs=new_config, **kwargs)
 
     @classmethod
     def from_cli_args(cls, cli_args, **kwargs):
