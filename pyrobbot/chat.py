@@ -78,7 +78,7 @@ class Chat(AlternativeConstructors):
         self._passed_configs = configs
         for field in self._passed_configs.model_fields:
             # 给对象赋值
-            logger.info('给对象赋值：{} set {} value {}', self, field, self._passed_configs[field])
+            # logger.info('给对象赋值：{} set {} value {}', self, field, self._passed_configs[field])
             setattr(self, field, self._passed_configs[field])
         try:
             self.openai_client = (

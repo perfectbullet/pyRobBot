@@ -596,7 +596,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
             field_names += list(VoiceChatConfigs.model_fields)
             field_names = list(dict.fromkeys(field_names))
             model_fields = {k: VoiceChatConfigs.model_fields[k] for k in field_names}
-            logger.info('model_fields is {}', model_fields)
+            # logger.info('model_fields is {}', model_fields)
             updates_to_chat_configs = self._handle_chat_configs_value_selection(
                 current_chat_configs, model_fields
             )
