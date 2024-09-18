@@ -61,15 +61,18 @@ class SpeechToText(SpeechAndTextConfigs):
         if not self.speech:
             logger.debug("No speech detected")
             return ""
+        stt_function = self._stt_openai
+        fallback_stt_function = self._stt_google
+        fallback_name = "google"
 
-        if self.engine == "openai":
-            stt_function = self._stt_openai
-            fallback_stt_function = self._stt_google
-            fallback_name = "google"
-        else:
-            stt_function = self._stt_google
-            fallback_stt_function = self._stt_openai
-            fallback_name = "openai"
+        # if self.engine == "openai":
+        #     stt_function = self._stt_openai
+        #     fallback_stt_function = self._stt_google
+        #     fallback_name = "google"
+        # else:
+        #     stt_function = self._stt_google
+        #     fallback_stt_function = self._stt_openai
+        #     fallback_name = "openai"
 
         conversion_id = uuid.uuid4()
         logger.debug(
