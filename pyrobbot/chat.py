@@ -97,40 +97,19 @@ class Chat(AlternativeConstructors):
 
     @property
     def base_directive(self):
-        """Return the base directive for the LLM."""
+        """
+        Return the base directive for the LLM.
+        """
         code_marker = self._code_marker
         local_datetime = datetime.now(get_localzone()).isoformat(timespec="seconds")
-        # msg_content = (
-        #     f"Your name is {self.assistant_name}. Your model is {self.model}\n"
-        #     f"You are a helpful assistant to {self.username}\n"
-        #     f"You have internet access\n"
-        #     f"You MUST ALWAYS write {code_marker} before AND after code blocks. Example: "
-        #     f"```foo ... ``` MUST become {code_marker}```foo ... ```{code_marker}\n"
-        #     f"The current city is {GeneralDefinitions.IPINFO['city']} in "
-        #     f"{GeneralDefinitions.IPINFO['country_name']}\n"
-        #     f"The local datetime is {local_datetime}\n"
-        #     f"\nYou must follow all directives by {self.system_name} "
-        #     f"unless otherwise instructed by {self.username}\n"
-        #     f"You must reply in {self.language} unless otherwise instructed\n"
-        #     "> If asked to look up online, web, internet etc, *you MUST ALWAYS AGREE*\n"
-        #     "\n*IMPORTANT*: If you can't find information neither in your training data "
-        #     "nor in the conversation context then, unless you have either already "
-        #     f"looked up online or not understood {self.username}'s prompt, you must "
-        #     "do as follows:\n"
-        #     "  > Do *NOT* apologise nor say you are sorry nor give any excuses.\n"
-        #     "  > Do *NOT* ask for permission to lookup online.\n"
-        #     "  > STATE CLEARLY that you will look it up online.\n"
-        #     "\n".join([f"{instruct.strip(' .')}." for instruct in self.ai_instructions])
-        # )
-
-        # update to chinese
         msg_content = (
             f"Your name is {self.assistant_name}. Your model is {self.model}\n"
             f"You are a helpful assistant to {self.username}\n"
+            f"You have internet access\n"
             f"You MUST ALWAYS write {code_marker} before AND after code blocks. Example: "
             f"```foo ... ``` MUST become {code_marker}```foo ... ```{code_marker}\n"
-            f"The current city is Chengdu in "
-            f"China\n"
+            f"The current city is {GeneralDefinitions.IPINFO['city']} in "
+            f"{GeneralDefinitions.IPINFO['country_name']}\n"
             f"The local datetime is {local_datetime}\n"
             f"\nYou must follow all directives by {self.system_name} "
             f"unless otherwise instructed by {self.username}\n"
@@ -145,6 +124,26 @@ class Chat(AlternativeConstructors):
             "  > STATE CLEARLY that you will look it up online.\n"
             "\n".join([f"{instruct.strip(' .')}." for instruct in self.ai_instructions])
         )
+
+        # update to chinese
+        # msg_content = (
+        #     f"你是一个AI助手\n"
+        #     f"当地日期时间是 {local_datetime}\n"
+        #     f"你必须遵守{self.system_name}的所有指令"
+        #     f"除非{self.username}另有指示\n"
+        #     "按照如下操作\n"
+        #     "  > 不要道歉，不要说对不起，也不要找任何借口。\n"
+        #     "  > *请勿*请求在线查找的许可。\n"
+        #     "  > 明确说明您将在网上查找。\n"
+        #     "\n".join([f"{instruct.strip(' .')}." for instruct in self.ai_instructions])
+        # )
+
+        # msg_content = (
+        #     f"你是一个AI助手\n"
+        #     "\n".join([f"{instruct.strip(' .')}." for instruct in self.ai_instructions])
+        # )
+        logger.info('self.system_name is {}', self.system_name)
+        logger.info('msg_content is {}', msg_content)
         return {"role": "system", "name": self.system_name, "content": msg_content}
 
     @property
@@ -256,10 +255,10 @@ class Chat(AlternativeConstructors):
         if not user_set_greeting:
             self._initial_greeting = default_greeting
 
-        # custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
-        # logger.info('self.language {}', self.language)
-        # if custom_greeting or self.language[:2] != "en":
-        #     self._initial_greeting = self._translate(self._initial_greeting)
+        custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
+        logger.info('self.language {}', self.language)
+        if custom_greeting or self.language != "en":
+            self._initial_greeting = self._translate(self._initial_greeting)
         logger.info('_initial_greeting is {}', self._initial_greeting)
         return self._initial_greeting
 

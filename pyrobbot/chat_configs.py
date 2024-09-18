@@ -135,7 +135,7 @@ class ChatOptions(OpenAiApiCallOptions):
     )
     ai_instructions: tuple[str, ...] = Field(
         default=(
-            "准确回答",
+            "你必须准确回答",
             "除非明确要求，否则你不会撒谎或编造信息。",
         ),
         description="Initial instructions for the AI",

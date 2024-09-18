@@ -21,8 +21,8 @@ class OpenAiClientWrapper(openai.OpenAI):
 
     def __init__(self, *args, private_mode: bool = False, **kwargs):
         """Initialize the OpenAI API client wrapper."""
-        # base_url = 'http://125.69.16.175:11434/v1'
-        base_url = 'http://localhost:11434/v1'
+        base_url = 'http://125.69.16.175:11434/v1'
+        # base_url = 'http://localhost:11434/v1'
         api_key = 'ollama'  # required, but unused
         kwargs['base_url'] = base_url
         kwargs['api_key'] = api_key
