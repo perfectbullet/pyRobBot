@@ -12,8 +12,8 @@ import tiktoken
 # See <https://openai.com/pricing> for the latest prices.
 PRICE_PER_K_TOKENS_LLM = {
     # "llamafamily/llama3-chinese-8b-instruct": {"input": 0.0005, "output": 0.0015},
-    "LLama3-8B-Chinese-Chat-medical": {"input": 0.0005, "output": 0.0015},
     "llama3": {"input": 0.0005, "output": 0.0015},
+    "LLama3-8B-Chinese-Chat-medical": {"input": 0.0005, "output": 0.0015},
     "Llama3-8B-Chinese-Chat": {"input": 0.0005, "output": 0.0015},
     # # Continuous model upgrades (models that point to the latest versions)
     # "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},

@@ -135,8 +135,8 @@ class ChatOptions(OpenAiApiCallOptions):
     )
     ai_instructions: tuple[str, ...] = Field(
         default=(
-            "你必须准确回答",
-            "除非明确要求，否则你不会撒谎或编造信息。",
+            "You answer correctly.",
+            "You do not lie or make up information unless explicitly asked to do so.",
         ),
         description="Initial instructions for the AI",
     )
@@ -149,7 +149,7 @@ class ChatOptions(OpenAiApiCallOptions):
         json_schema_extra={"frozen": True},
     )
     initial_greeting: Optional[str] = Field(
-        default="我是Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。", description="Initial greeting given by the assistant"
+        default="", description="Initial greeting given by the assistant"
     )
     private_mode: Optional[bool] = Field(
         default=False,
