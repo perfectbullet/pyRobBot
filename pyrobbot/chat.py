@@ -404,12 +404,12 @@ class Chat(AlternativeConstructors):
 
         # Make API request and yield response chunks
         full_reply_content = ""
-        # for chunk in make_api_chat_completion_call(
-        #         conversation=[self.base_directive, prompt_msg], chat_obj=self
-        # ):
         for chunk in make_api_chat_completion_call(
-            conversation=[self.base_directive, *context, prompt_msg], chat_obj=self
+                conversation=[self.base_directive, prompt_msg], chat_obj=self
         ):
+        # for chunk in make_api_chat_completion_call(
+        #     conversation=[self.base_directive, *context, prompt_msg], chat_obj=self
+        # ):
             full_reply_content += chunk.strip(self._code_marker)
             yield chunk
 

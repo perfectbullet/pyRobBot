@@ -8,7 +8,7 @@ from typing import Literal
 
 import numpy as np
 import speech_recognition as sr
-from gtts import gTTS
+# from gtts import gTTS
 from loguru import logger
 from openai import OpenAI
 from pydub import AudioSegment
