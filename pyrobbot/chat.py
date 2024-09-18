@@ -95,14 +95,37 @@ class Chat(AlternativeConstructors):
         """Return the base directive for the LLM."""
         code_marker = self._code_marker
         local_datetime = datetime.now(get_localzone()).isoformat(timespec="seconds")
+        # msg_content = (
+        #     f"Your name is {self.assistant_name}. Your model is {self.model}\n"
+        #     f"You are a helpful assistant to {self.username}\n"
+        #     f"You have internet access\n"
+        #     f"You MUST ALWAYS write {code_marker} before AND after code blocks. Example: "
+        #     f"```foo ... ``` MUST become {code_marker}```foo ... ```{code_marker}\n"
+        #     f"The current city is {GeneralDefinitions.IPINFO['city']} in "
+        #     f"{GeneralDefinitions.IPINFO['country_name']}\n"
+        #     f"The local datetime is {local_datetime}\n"
+        #     f"\nYou must follow all directives by {self.system_name} "
+        #     f"unless otherwise instructed by {self.username}\n"
+        #     f"You must reply in {self.language} unless otherwise instructed\n"
+        #     "> If asked to look up online, web, internet etc, *you MUST ALWAYS AGREE*\n"
+        #     "\n*IMPORTANT*: If you can't find information neither in your training data "
+        #     "nor in the conversation context then, unless you have either already "
+        #     f"looked up online or not understood {self.username}'s prompt, you must "
+        #     "do as follows:\n"
+        #     "  > Do *NOT* apologise nor say you are sorry nor give any excuses.\n"
+        #     "  > Do *NOT* ask for permission to lookup online.\n"
+        #     "  > STATE CLEARLY that you will look it up online.\n"
+        #     "\n".join([f"{instruct.strip(' .')}." for instruct in self.ai_instructions])
+        # )
+
+        # update to chinese
         msg_content = (
             f"Your name is {self.assistant_name}. Your model is {self.model}\n"
             f"You are a helpful assistant to {self.username}\n"
-            f"You have internet access\n"
             f"You MUST ALWAYS write {code_marker} before AND after code blocks. Example: "
             f"```foo ... ``` MUST become {code_marker}```foo ... ```{code_marker}\n"
-            f"The current city is {GeneralDefinitions.IPINFO['city']} in "
-            f"{GeneralDefinitions.IPINFO['country_name']}\n"
+            f"The current city is Chengdu in "
+            f"China\n"
             f"The local datetime is {local_datetime}\n"
             f"\nYou must follow all directives by {self.system_name} "
             f"unless otherwise instructed by {self.username}\n"

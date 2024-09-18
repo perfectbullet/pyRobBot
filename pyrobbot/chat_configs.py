@@ -82,7 +82,7 @@ class BaseConfigModel(BaseModel, extra="forbid"):
         with open(fpath, "r") as configs_file:
             data = json.load(configs_file)
             data['context_model'] = 'full-history'
-            data['initial_greeting'] = '你好'
+            # data['initial_greeting'] = '你好'
             logger.info('data is {}'.format(data))
             return cls.model_validate(data)
 
