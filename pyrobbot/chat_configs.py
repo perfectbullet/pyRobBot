@@ -121,7 +121,11 @@ class OpenAiApiCallOptions(BaseConfigModel):
 
 
 class ChatOptions(OpenAiApiCallOptions):
-    """Model for the chat's configuration options."""
+    """
+    Model for the chat's configuration options.
+    聊天模型配置选项
+    可以直接显示在页面中
+    """
 
     username: str = Field(default=getuser(), description="Name of the chat's user")
     assistant_name: str = Field(default="Rob", description="Name of the chat's assistant")
@@ -145,7 +149,7 @@ class ChatOptions(OpenAiApiCallOptions):
         json_schema_extra={"frozen": True},
     )
     initial_greeting: Optional[str] = Field(
-        default="", description="Initial greeting given by the assistant"
+        default="我是 Rob，我是一名有 AI 助手，旨在帮助 zj 解决问题和回答问题。", description="Initial greeting given by the assistant"
     )
     private_mode: Optional[bool] = Field(
         default=False,

@@ -21,7 +21,8 @@ class OpenAiClientWrapper(openai.OpenAI):
 
     def __init__(self, *args, private_mode: bool = False, **kwargs):
         """Initialize the OpenAI API client wrapper."""
-        base_url = 'http://125.69.16.175:11434/v1'
+        # base_url = 'http://125.69.16.175:11434/v1'
+        base_url = 'http://localhost:11434/v1'
         api_key = 'ollama'  # required, but unused
         kwargs['base_url'] = base_url
         kwargs['api_key'] = api_key
@@ -67,6 +68,7 @@ class OpenAiClientWrapper(openai.OpenAI):
             client_id = "demo"
             parent_dir = GeneralDefinitions.PACKAGE_TMPDIR
         else:
+            # '76e3c7bfe641ea125c0c2e1c5f89349e17b352ed128d528de2443794e7acf870'
             client_id = hashlib.sha256(self.api_key.encode("utf-8")).hexdigest()
             parent_dir = GeneralDefinitions.PACKAGE_CACHE_DIRECTORY
 
