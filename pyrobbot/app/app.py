@@ -1,7 +1,12 @@
 """Entrypoint for the package's UI."""
-
+import os
 from pyrobbot import GeneralDefinitions
 from pyrobbot.app.multipage import MultipageChatbotApp
+
+os.environ["HTTP_PROXY"] = ''
+os.environ["HTTPS_PROXY"] = ''
+os.environ["all_proxy"] = ''
+os.environ["ALL_PROXY"] = ''
 
 
 def run_app():
