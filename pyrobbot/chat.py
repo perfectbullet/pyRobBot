@@ -26,7 +26,7 @@ from .general_utils import (
 from .internet_utils import websearch
 from .openai_utils import OpenAiClientWrapper, make_api_chat_completion_call
 from .sst_and_tts import SpeechToText, TextToSpeech
-from .tokens import PRICE_PER_K_TOKENS_EMBEDDINGS, TokenUsageDatabase
+# from .tokens import PRICE_PER_K_TOKENS_EMBEDDINGS, TokenUsageDatabase
 
 
 @dataclass
@@ -183,24 +183,24 @@ class Chat(AlternativeConstructors):
         if self.context_model == "full-history":
             return FullHistoryChatContext(parent_chat=self)
 
-        if self.context_model in PRICE_PER_K_TOKENS_EMBEDDINGS:
-            return EmbeddingBasedChatContext(parent_chat=self)
+        # if self.context_model in PRICE_PER_K_TOKENS_EMBEDDINGS:
+        #     return EmbeddingBasedChatContext(parent_chat=self)
 
         raise NotImplementedError(f"Unknown context model: {self.context_model}")
 
-    @property
-    def token_usage_db(self):
-        """Return the chat's token usage database."""
-        return TokenUsageDatabase(fpath=self.cache_dir / "chat_token_usage.db")
+    # @property
+    # def token_usage_db(self):
+    #     """Return the chat's token usage database."""
+    #     return TokenUsageDatabase(fpath=self.cache_dir / "chat_token_usage.db")
 
-    @property
-    def general_token_usage_db(self):
-        """Return the general token usage database for all chats.
-
-        Even private-mode chats will use this database to keep track of total token usage.
-        """
-        general_cache_dir = self.openai_client.get_cache_dir(private_mode=False)
-        return TokenUsageDatabase(fpath=general_cache_dir.parent / "token_usage.db")
+    # @property
+    # def general_token_usage_db(self):
+    #     """Return the general token usage database for all chats.
+    #
+    #     Even private-mode chats will use this database to keep track of total token usage.
+    #     """
+    #     general_cache_dir = self.openai_client.get_cache_dir(private_mode=False)
+    #     return TokenUsageDatabase(fpath=general_cache_dir.parent / "token_usage.db")
 
     @property
     def metadata_file(self):
@@ -248,18 +248,19 @@ class Chat(AlternativeConstructors):
         Return the initial greeting for the chat.
         返回聊天的初始问候语。
         """
-        # default_greeting = "我是Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。"
-        default_greeting = f"Hi! I'm {self.assistant_name}. How can I assist you?"
+        default_greeting = "我是Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。"
+        # default_greeting = f"Hi! I'm {self.assistant_name}. How can I assist you?"
+        logger.info('default_greeting is {}', default_greeting)
         with contextlib.suppress(AttributeError):
             user_set_greeting = self._initial_greeting != ""
 
         if not user_set_greeting:
             self._initial_greeting = default_greeting
 
-        custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
-        logger.info('self.language {}', self.language)
-        if custom_greeting or self.language != "en":
-            self._initial_greeting = self._translate(self._initial_greeting)
+        # custom_greeting = user_set_greeting and self._initial_greeting != default_greeting
+        # logger.info('self.language {}', self.language)
+        # if custom_greeting or self.language != "en":
+        #     self._initial_greeting = self._translate(self._initial_greeting)
         logger.info('_initial_greeting is {}', self._initial_greeting)
         return self._initial_greeting
 
@@ -371,8 +372,8 @@ class Chat(AlternativeConstructors):
             engine=self.stt_engine,
             language=self.language,
             timeout=self.timeout,
-            general_token_usage_db=self.general_token_usage_db,
-            token_usage_db=self.token_usage_db,
+            # general_token_usage_db=self.general_token_usage_db,
+            # token_usage_db=self.token_usage_db,
         )
 
     def tts(self, text: str):
@@ -384,8 +385,8 @@ class Chat(AlternativeConstructors):
             engine=self.tts_engine,
             openai_tts_voice=self.openai_tts_voice,
             timeout=self.timeout,
-            general_token_usage_db=self.general_token_usage_db,
-            token_usage_db=self.token_usage_db,
+            # general_token_usage_db=self.general_token_usage_db,
+            # token_usage_db=self.token_usage_db,
         )
 
     def _yield_response_from_msg(
@@ -413,84 +414,84 @@ class Chat(AlternativeConstructors):
             full_reply_content += chunk.strip(self._code_marker)
             yield chunk
 
-        if not skip_check:
-            last_msg_exchange = (
-                f"`user` says: {prompt_msg['content']}\n"
-                f"`you` replies: {full_reply_content}"
-            )
-            system_check_msg = (
-                "Consider the following dialogue between `user` and `you` "
-                "AND NOTHING MORE:\n\n"
-                f"{last_msg_exchange}\n\n"
-                "Now answer the following question using only 'yes' or 'no':\n"
-                "Were `you` able to provide a good answer the `user`s prompt, without "
-                "neither `you` nor `user` asking or implying the need or intention to "
-                "perform a search or lookup online, on the web or the internet?\n"
-            )
-
-            reply = "".join(self.respond_system_prompt(prompt=system_check_msg))
-            reply = reply.strip(".' ").lower()
-            if ("no" in reply) or (self._translate("no") in reply):
-                instructions_for_web_search = (
-                    "You are a professional web searcher. You will be presented with a "
-                    "dialogue between `user` and `you`. Considering the dialogue and "
-                    "relevant previous messages, write "
-                    "the best short web search query to look for an answer to the "
-                    "`user`'s prompt. You MUST follow the rules below:\n"
-                    "* Write *only the query* and nothing else\n"
-                    "* DO NOT RESTRICT the search to any particular website "
-                    "unless otherwise instructed\n"
-                    "* You MUST reply in the `user`'s language unless otherwise asked\n\n"
-                    "The `dialogue` is:"
-                )
-                instructions_for_web_search += f"\n\n{last_msg_exchange}"
-                internet_query = "".join(
-                    self.respond_system_prompt(prompt=instructions_for_web_search)
-                )
-                yield "\n\n" + self._translate(
-                    "Searching the web now. My search is: "
-                ) + f" '{internet_query}'..."
-                web_results_json_dumps = "\n\n".join(
-                    json.dumps(result, indent=2) for result in websearch(internet_query)
-                )
-                if web_results_json_dumps:
-                    logger.opt(colors=True).debug(
-                        "Web search rtn: <yellow>{}</yellow>...", web_results_json_dumps
-                    )
-                    original_prompt = prompt_msg["content"]
-                    prompt = (
-                        "You are a talented data analyst, "
-                        "capable of summarising any information, even complex `json`. "
-                        "You will be shown a `json` and a `prompt`. Your task is to "
-                        "summarise the `json` to answer the `prompt`. "
-                        "You MUST follow the rules below:\n\n"
-                        "* *ALWAYS* provide a meaningful summary to the the `json`\n"
-                        "* *Do NOT include links* or anything a human can't pronounce, "
-                        "unless otherwise instructed\n"
-                        "* Prefer searches without quotes but use them if needed\n"
-                        "* Answer in human language (i.e., no json, etc)\n"
-                        "* Answer in the `user`'s language unless otherwise asked\n"
-                        "* Make sure to point out that the information is from a quick "
-                        "web search and may be innacurate\n"
-                        "* Mention the sources shortly WITHOUT MENTIONING WEB LINKS\n\n"
-                        "The `json` and the `prompt` are presented below:\n"
-                    )
-                    prompt += f"\n```json\n{web_results_json_dumps}\n```\n"
-                    prompt += f"\n`prompt`: '{original_prompt}'"
-
-                    yield "\n\n" + self._translate(
-                        " I've got some results. Let me summarise them for you..."
-                    )
-
-                    full_reply_content += " "
-                    yield "\n\n"
-                    for chunk in self.respond_system_prompt(prompt=prompt):
-                        full_reply_content += chunk.strip(self._code_marker)
-                        yield chunk
-                else:
-                    yield self._translate(
-                        "Sorry, but I couldn't find anything on the web this time."
-                    )
+        # if not skip_check:
+        #     last_msg_exchange = (
+        #         f"`user` says: {prompt_msg['content']}\n"
+        #         f"`you` replies: {full_reply_content}"
+        #     )
+        #     system_check_msg = (
+        #         "Consider the following dialogue between `user` and `you` "
+        #         "AND NOTHING MORE:\n\n"
+        #         f"{last_msg_exchange}\n\n"
+        #         "Now answer the following question using only 'yes' or 'no':\n"
+        #         "Were `you` able to provide a good answer the `user`s prompt, without "
+        #         "neither `you` nor `user` asking or implying the need or intention to "
+        #         "perform a search or lookup online, on the web or the internet?\n"
+        #     )
+        #
+        #     reply = "".join(self.respond_system_prompt(prompt=system_check_msg))
+        #     reply = reply.strip(".' ").lower()
+        #     if ("no" in reply) or (self._translate("no") in reply):
+        #         instructions_for_web_search = (
+        #             "You are a professional web searcher. You will be presented with a "
+        #             "dialogue between `user` and `you`. Considering the dialogue and "
+        #             "relevant previous messages, write "
+        #             "the best short web search query to look for an answer to the "
+        #             "`user`'s prompt. You MUST follow the rules below:\n"
+        #             "* Write *only the query* and nothing else\n"
+        #             "* DO NOT RESTRICT the search to any particular website "
+        #             "unless otherwise instructed\n"
+        #             "* You MUST reply in the `user`'s language unless otherwise asked\n\n"
+        #             "The `dialogue` is:"
+        #         )
+        #         instructions_for_web_search += f"\n\n{last_msg_exchange}"
+        #         internet_query = "".join(
+        #             self.respond_system_prompt(prompt=instructions_for_web_search)
+        #         )
+        #         yield "\n\n" + self._translate(
+        #             "Searching the web now. My search is: "
+        #         ) + f" '{internet_query}'..."
+        #         web_results_json_dumps = "\n\n".join(
+        #             json.dumps(result, indent=2) for result in websearch(internet_query)
+        #         )
+        #         if web_results_json_dumps:
+        #             logger.opt(colors=True).debug(
+        #                 "Web search rtn: <yellow>{}</yellow>...", web_results_json_dumps
+        #             )
+        #             original_prompt = prompt_msg["content"]
+        #             prompt = (
+        #                 "You are a talented data analyst, "
+        #                 "capable of summarising any information, even complex `json`. "
+        #                 "You will be shown a `json` and a `prompt`. Your task is to "
+        #                 "summarise the `json` to answer the `prompt`. "
+        #                 "You MUST follow the rules below:\n\n"
+        #                 "* *ALWAYS* provide a meaningful summary to the the `json`\n"
+        #                 "* *Do NOT include links* or anything a human can't pronounce, "
+        #                 "unless otherwise instructed\n"
+        #                 "* Prefer searches without quotes but use them if needed\n"
+        #                 "* Answer in human language (i.e., no json, etc)\n"
+        #                 "* Answer in the `user`'s language unless otherwise asked\n"
+        #                 "* Make sure to point out that the information is from a quick "
+        #                 "web search and may be innacurate\n"
+        #                 "* Mention the sources shortly WITHOUT MENTIONING WEB LINKS\n\n"
+        #                 "The `json` and the `prompt` are presented below:\n"
+        #             )
+        #             prompt += f"\n```json\n{web_results_json_dumps}\n```\n"
+        #             prompt += f"\n`prompt`: '{original_prompt}'"
+        #
+        #             yield "\n\n" + self._translate(
+        #                 " I've got some results. Let me summarise them for you..."
+        #             )
+        #
+        #             full_reply_content += " "
+        #             yield "\n\n"
+        #             for chunk in self.respond_system_prompt(prompt=prompt):
+        #                 full_reply_content += chunk.strip(self._code_marker)
+        #                 yield chunk
+        #         else:
+        #             yield self._translate(
+        #                 "Sorry, but I couldn't find anything on the web this time."
+        #             )
 
         if add_to_history:
             # Put current chat exchange in context handler's history
