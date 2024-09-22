@@ -14,7 +14,7 @@ from openai import OpenAI
 from pydub import AudioSegment
 
 from .general_utils import retry
-from .tokens import TokenUsageDatabase
+# from .tokens import TokenUsageDatabase
 from pyrobbot.whisper_service_utils import transcribe
 from pyrobbot.request_tts import tts_request, emotivoice_url
 
@@ -23,8 +23,8 @@ class SpeechAndTextConfigs:
     """Configs for speech-to-text and text-to-speech."""
 
     openai_client: OpenAI
-    general_token_usage_db: TokenUsageDatabase
-    token_usage_db: TokenUsageDatabase
+    # general_token_usage_db: TokenUsageDatabase
+    # token_usage_db: TokenUsageDatabase
     engine: Literal["openai", "google"] = "google"
     language: str = "zh"
     timeout: int = 10

@@ -11,8 +11,8 @@ from loguru import logger
 from pydantic import BaseModel, Field
 
 from . import GeneralDefinitions
-from .tokens import PRICE_PER_K_TOKENS_EMBEDDINGS, PRICE_PER_K_TOKENS_LLM
-
+# from .tokens import PRICE_PER_K_TOKENS_EMBEDDINGS, PRICE_PER_K_TOKENS_LLM
+from .tokens import PRICE_PER_K_TOKENS_LLM
 
 class BaseConfigModel(BaseModel, extra="forbid"):
     """Base model for configuring options."""
@@ -93,10 +93,12 @@ class OpenAiApiCallOptions(BaseConfigModel):
     _openai_url = "https://platform.openai.com/docs/api-reference/chat/create#chat-create"
     _models_url = "https://platform.openai.com/docs/models"
 
-    model: Literal[tuple(PRICE_PER_K_TOKENS_LLM)] = Field(
-        default=next(iter(PRICE_PER_K_TOKENS_LLM)),
-        description=f"OpenAI LLM model to use. See {_openai_url}-model and {_models_url}",
-    )
+    model: str = Field(default="llama3", description="LLM model to use")
+    #
+    # model: Literal['llama3', ] = Field(
+    #     default=next(iter(PRICE_PER_K_TOKENS_LLM)),
+    #     description=f"OpenAI LLM model to use. See {_openai_url}-model and {_models_url}",
+    # )
     max_tokens: Optional[int] = Field(
         default=None, gt=0, description=f"See <{_openai_url}-max_tokens>"
     )
@@ -126,7 +128,7 @@ class ChatOptions(OpenAiApiCallOptions):
     聊天模型配置选项
     可以直接显示在页面中
     """
-
+    model: str = Field(default="llama3", description="LLM model to use")
     username: str = Field(default=getuser(), description="Name of the chat's user")
     assistant_name: str = Field(default="Rob", description="Name of the chat's assistant")
     system_name: str = Field(
@@ -140,14 +142,15 @@ class ChatOptions(OpenAiApiCallOptions):
         ),
         description="Initial instructions for the AI",
     )
-    context_model: Literal[tuple(PRICE_PER_K_TOKENS_EMBEDDINGS)] = Field(
-        default=next(iter(PRICE_PER_K_TOKENS_EMBEDDINGS)),
-        description=(
-            "Model to use for chat context (~memory). "
-            + "Once picked, it cannot be changed."
-        ),
-        json_schema_extra={"frozen": True},
-    )
+    # context_model: Literal[tuple(PRICE_PER_K_TOKENS_EMBEDDINGS)] = Field(
+    #     default=next(iter(PRICE_PER_K_TOKENS_EMBEDDINGS)),
+    #     description=(
+    #         "Model to use for chat context (~memory). "
+    #         + "Once picked, it cannot be changed."
+    #     ),
+    #     json_schema_extra={"frozen": True},
+    # )
+    context_model: str = Field('full-history', description='Model to use for chat context (~memory).Once picked, it cannot be changed.')
     initial_greeting: Optional[str] = Field(
         default="", description="Initial greeting given by the assistant"
     )

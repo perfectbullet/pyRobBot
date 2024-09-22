@@ -289,7 +289,9 @@ class AbstractMultipageApp(ABC):
     """
 
     def __init__(self, **kwargs) -> None:
-        """Initialise streamlit page configs."""
+        """
+        Initialise streamlit page configs.
+        """
         st.set_page_config(**kwargs)
 
         self.listen_thread = listen_thread

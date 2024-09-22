@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING, Optional
 import openai
 from loguru import logger
 
+from getpass import getuser
+
 from . import GeneralDefinitions
 from .chat_configs import OpenAiApiCallOptions
 from .general_utils import retry
-from .tokens import get_n_tokens_from_msgs
+# from .tokens import get_n_tokens_from_msgs
 
 if TYPE_CHECKING:
     from .chat import Chat
@@ -19,9 +21,14 @@ if TYPE_CHECKING:
 class OpenAiClientWrapper(openai.OpenAI):
     """Wrapper for OpenAI API client."""
 
-    def __init__(self, *args, private_mode: bool = False, **kwargs):
+    def __init__(self, private_mode: bool = False, **kwargs):
         """Initialize the OpenAI API client wrapper."""
-        base_url = 'http://125.69.16.175:11434/v1'
+        if getuser() == 'zj':
+            # at home pc
+            base_url = 'http://localhost:11434/v1'
+        else:
+            # gx ww pc
+            base_url = 'http://125.69.16.175:11434/v1'
         # base_url = 'http://localhost:11434/v1'
         api_key = 'ollama'  # required, but unused
         kwargs['base_url'] = base_url
@@ -106,9 +113,9 @@ def make_api_chat_completion_call(conversation: list, chat_obj: "Chat"):
     def stream_reply(conversation, **api_call_args):
         # Update the chat's token usage database with tokens used in chat input
         # Do this here because every attempt consumes tokens, even if it fails
-        n_tokens = get_n_tokens_from_msgs(messages=conversation, model=chat_obj.model)
-        for db in [chat_obj.general_token_usage_db, chat_obj.token_usage_db]:
-            db.insert_data(model=chat_obj.model, n_input_tokens=n_tokens)
+        # n_tokens = get_n_tokens_from_msgs(messages=conversation, model=chat_obj.model)
+        # for db in [chat_obj.general_token_usage_db, chat_obj.token_usage_db]:
+        #     db.insert_data(model=chat_obj.model, n_input_tokens=n_tokens)
 
         full_reply_content = ""
         for completion_chunk in chat_obj.openai_client.chat.completions.create(
@@ -119,12 +126,12 @@ def make_api_chat_completion_call(conversation: list, chat_obj: "Chat"):
                 break
             full_reply_content += reply_chunk
             yield reply_chunk
-
+        logger.info('full_reply_content is {}', full_reply_content)
         # Update the chat's token usage database with tokens used in chat output
-        reply_as_msg = {"role": "assistant", "content": full_reply_content}
-        n_tokens = get_n_tokens_from_msgs(messages=[reply_as_msg], model=chat_obj.model)
-        for db in [chat_obj.general_token_usage_db, chat_obj.token_usage_db]:
-            db.insert_data(model=chat_obj.model, n_output_tokens=n_tokens)
+        # reply_as_msg = {"role": "assistant", "content": full_reply_content}
+        # n_tokens = get_n_tokens_from_msgs(messages=[reply_as_msg], model=chat_obj.model)
+        # for db in [chat_obj.general_token_usage_db, chat_obj.token_usage_db]:
+        #     db.insert_data(model=chat_obj.model, n_output_tokens=n_tokens)
 
     logger.info("Done with OpenAI API call")
     yield from stream_reply(conversation, **api_call_args)

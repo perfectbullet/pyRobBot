@@ -15,6 +15,12 @@ PRICE_PER_K_TOKENS_LLM = {
     "llama3": {"input": 0.0005, "output": 0.0015},
     "LLama3-8B-Chinese-Chat-medical": {"input": 0.0005, "output": 0.0015},
     "Llama3-8B-Chinese-Chat": {"input": 0.0005, "output": 0.0015},
+}
+PRICE_PER_K_TOKENS_LLM = {
+    # "llamafamily/llama3-chinese-8b-instruct": {"input": 0.0005, "output": 0.0015},
+    "llama3": {"input": 0.0005, "output": 0.0015},
+    "LLama3-8B-Chinese-Chat-medical": {"input": 0.0005, "output": 0.0015},
+    "Llama3-8B-Chinese-Chat": {"input": 0.0005, "output": 0.0015},
     # # Continuous model upgrades (models that point to the latest versions)
     # "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},
     # "gpt-4-turbo-preview": {"input": 0.01, "output": 0.03},
@@ -33,138 +39,138 @@ PRICE_PER_K_TOKENS_LLM = {
     # "gpt-4-0613": {"input": 0.03, "output": 0.06},
     # "gpt-4-32k-0613": {"input": 0.06, "output": 0.12},
 }
-PRICE_PER_K_TOKENS_EMBEDDINGS = {
-    # "text-embedding-3-small": {"input": 0.00002, "output": 0.0},
-    # "text-embedding-3-large": {"input": 0.00013, "output": 0.0},
-    # "text-embedding-ada-002": {"input": 0.0001, "output": 0.0},
-    # "text-embedding-ada-002-v2": {"input": 0.0001, "output": 0.0},
-    # "text-davinci:002": {"input": 0.0020, "output": 0.020},
-    "full-history": {"input": 0.0, "output": 0.0},
-}
-PRICE_PER_K_TOKENS_TTS_AND_STT = {
-    "tts-1": {"input": 0.015, "output": 0.0},
-    "tts-1-hd": {"input": 0.03, "output": 0.0},
-    "whisper-1": {"input": 0.006, "output": 0.0},
-}
-PRICE_PER_K_TOKENS = (
-    PRICE_PER_K_TOKENS_LLM
-    | PRICE_PER_K_TOKENS_EMBEDDINGS
-    | PRICE_PER_K_TOKENS_TTS_AND_STT
-)
-
-
-class TokenUsageDatabase:
-    """Manages a database to store estimated token usage and costs for OpenAI API."""
-
-    def __init__(self, fpath: Path):
-        """Initialize a TokenUsageDatabase instance."""
-        self.fpath = fpath
-        self.token_price = {}
-        for model, price_per_k_tokens in PRICE_PER_K_TOKENS.items():
-            self.token_price[model] = {
-                k: v / 1000.0 for k, v in price_per_k_tokens.items()
-            }
-
-        self.create()
-
-    def create(self):
-        """Create the database if it doesn't exist."""
-        self.fpath.parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(self.fpath)
-        cursor = conn.cursor()
-
-        # Create a table to store the data with 'timestamp' as the primary key
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS token_costs (
-                timestamp INTEGER NOT NULL,
-                model TEXT NOT NULL,
-                n_input_tokens INTEGER NOT NULL,
-                n_output_tokens INTEGER NOT NULL,
-                cost_input_tokens REAL NOT NULL,
-                cost_output_tokens REAL NOT NULL
-            )
-        """
-        )
-
-        conn.commit()
-        conn.close()
-
-    def insert_data(
-        self,
-        model: str,
-        n_input_tokens: int = 0,
-        n_output_tokens: int = 0,
-        timestamp: Optional[int] = None,
-    ):
-        """Insert the data into the token_costs table."""
-        if model is None:
-            return
-
-        conn = sqlite3.connect(self.fpath)
-        cursor = conn.cursor()
-
-        # Insert the data into the table
-        cursor.execute(
-            """
-        INSERT INTO token_costs (
-            timestamp,
-            model,
-            n_input_tokens,
-            n_output_tokens,
-            cost_input_tokens,
-            cost_output_tokens
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (
-                timestamp or int(datetime.datetime.utcnow().timestamp()),
-                model,
-                n_input_tokens,
-                n_output_tokens,
-                n_input_tokens * self.token_price[model]["input"],
-                n_output_tokens * self.token_price[model]["output"],
-            ),
-        )
-
-        conn.commit()
-        conn.close()
-
-    def get_usage_balance_dataframe(self):
-        """Get a dataframe with the accumulated token usage and costs."""
-        conn = sqlite3.connect(self.fpath)
-        query = """
-            SELECT
-                model as Model,
-                MIN(timestamp) AS "First Used",
-                SUM(n_input_tokens) AS "Tokens: In",
-                SUM(n_output_tokens) AS "Tokens: Out",
-                SUM(n_input_tokens + n_output_tokens) AS "Tokens: Tot.",
-                SUM(cost_input_tokens) AS "Cost ($): In",
-                SUM(cost_output_tokens) AS "Cost ($): Out",
-                SUM(cost_input_tokens + cost_output_tokens) AS "Cost ($): Tot."
-            FROM token_costs
-            GROUP BY model
-            ORDER BY "Cost ($): Tot." DESC
-        """
-
-        usage_df = pd.read_sql_query(query, con=conn)
-        conn.close()
-
-        usage_df["First Used"] = pd.to_datetime(usage_df["First Used"], unit="s")
-
-        usage_df = _group_columns_by_prefix(_add_totals_row(usage_df))
-
-        # Add metadata to returned dataframe
-        usage_df.attrs["description"] = "Estimated token usage and associated costs"
-        link = "https://platform.openai.com/account/usage"
-        disclaimers = [
-            "Note: These are only estimates. Actual costs may vary.",
-            f"Please visit <{link}> to follow your actual usage and costs.",
-        ]
-        usage_df.attrs["disclaimer"] = "\n".join(disclaimers)
-
-        return usage_df
+# PRICE_PER_K_TOKENS_EMBEDDINGS = {
+#     # "text-embedding-3-small": {"input": 0.00002, "output": 0.0},
+#     # "text-embedding-3-large": {"input": 0.00013, "output": 0.0},
+#     # "text-embedding-ada-002": {"input": 0.0001, "output": 0.0},
+#     # "text-embedding-ada-002-v2": {"input": 0.0001, "output": 0.0},
+#     # "text-davinci:002": {"input": 0.0020, "output": 0.020},
+#     "full-history": {"input": 0.0, "output": 0.0},
+# }
+# PRICE_PER_K_TOKENS_TTS_AND_STT = {
+#     "tts-1": {"input": 0.015, "output": 0.0},
+#     "tts-1-hd": {"input": 0.03, "output": 0.0},
+#     "whisper-1": {"input": 0.006, "output": 0.0},
+# }
+# PRICE_PER_K_TOKENS = (
+#     PRICE_PER_K_TOKENS_LLM
+#     | PRICE_PER_K_TOKENS_EMBEDDINGS
+#     | PRICE_PER_K_TOKENS_TTS_AND_STT
+# )
+#
+#
+# class TokenUsageDatabase:
+#     """Manages a database to store estimated token usage and costs for OpenAI API."""
+#
+#     def __init__(self, fpath: Path):
+#         """Initialize a TokenUsageDatabase instance."""
+#         self.fpath = fpath
+#         self.token_price = {}
+#         for model, price_per_k_tokens in PRICE_PER_K_TOKENS.items():
+#             self.token_price[model] = {
+#                 k: v / 1000.0 for k, v in price_per_k_tokens.items()
+#             }
+#
+#         self.create()
+#
+#     def create(self):
+#         """Create the database if it doesn't exist."""
+#         self.fpath.parent.mkdir(parents=True, exist_ok=True)
+#         conn = sqlite3.connect(self.fpath)
+#         cursor = conn.cursor()
+#
+#         # Create a table to store the data with 'timestamp' as the primary key
+#         cursor.execute(
+#             """
+#             CREATE TABLE IF NOT EXISTS token_costs (
+#                 timestamp INTEGER NOT NULL,
+#                 model TEXT NOT NULL,
+#                 n_input_tokens INTEGER NOT NULL,
+#                 n_output_tokens INTEGER NOT NULL,
+#                 cost_input_tokens REAL NOT NULL,
+#                 cost_output_tokens REAL NOT NULL
+#             )
+#         """
+#         )
+#
+#         conn.commit()
+#         conn.close()
+#
+#     def insert_data(
+#         self,
+#         model: str,
+#         n_input_tokens: int = 0,
+#         n_output_tokens: int = 0,
+#         timestamp: Optional[int] = None,
+#     ):
+#         """Insert the data into the token_costs table."""
+#         if model is None:
+#             return
+#
+#         conn = sqlite3.connect(self.fpath)
+#         cursor = conn.cursor()
+#
+#         # Insert the data into the table
+#         cursor.execute(
+#             """
+#         INSERT INTO token_costs (
+#             timestamp,
+#             model,
+#             n_input_tokens,
+#             n_output_tokens,
+#             cost_input_tokens,
+#             cost_output_tokens
+#         )
+#         VALUES (?, ?, ?, ?, ?, ?)
+#         """,
+#             (
+#                 timestamp or int(datetime.datetime.utcnow().timestamp()),
+#                 model,
+#                 n_input_tokens,
+#                 n_output_tokens,
+#                 n_input_tokens * self.token_price[model]["input"],
+#                 n_output_tokens * self.token_price[model]["output"],
+#             ),
+#         )
+#
+#         conn.commit()
+#         conn.close()
+#
+#     def get_usage_balance_dataframe(self):
+#         """Get a dataframe with the accumulated token usage and costs."""
+#         conn = sqlite3.connect(self.fpath)
+#         query = """
+#             SELECT
+#                 model as Model,
+#                 MIN(timestamp) AS "First Used",
+#                 SUM(n_input_tokens) AS "Tokens: In",
+#                 SUM(n_output_tokens) AS "Tokens: Out",
+#                 SUM(n_input_tokens + n_output_tokens) AS "Tokens: Tot.",
+#                 SUM(cost_input_tokens) AS "Cost ($): In",
+#                 SUM(cost_output_tokens) AS "Cost ($): Out",
+#                 SUM(cost_input_tokens + cost_output_tokens) AS "Cost ($): Tot."
+#             FROM token_costs
+#             GROUP BY model
+#             ORDER BY "Cost ($): Tot." DESC
+#         """
+#
+#         usage_df = pd.read_sql_query(query, con=conn)
+#         conn.close()
+#
+#         usage_df["First Used"] = pd.to_datetime(usage_df["First Used"], unit="s")
+#
+#         usage_df = _group_columns_by_prefix(_add_totals_row(usage_df))
+#
+#         # Add metadata to returned dataframe
+#         usage_df.attrs["description"] = "Estimated token usage and associated costs"
+#         link = "https://platform.openai.com/account/usage"
+#         disclaimers = [
+#             "Note: These are only estimates. Actual costs may vary.",
+#             f"Please visit <{link}> to follow your actual usage and costs.",
+#         ]
+#         usage_df.attrs["disclaimer"] = "\n".join(disclaimers)
+#
+#         return usage_df
 
 
 def get_n_tokens_from_msgs(messages: list[dict], model: str):
