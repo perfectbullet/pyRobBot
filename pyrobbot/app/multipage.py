@@ -606,7 +606,10 @@ class MultipageChatbotApp(AbstractMultipageApp):
         )
 
     def handle_ui_page_selection(self):
-        """Control page selection and removal in the UI sidebar."""
+        """
+        Control page selection and removal in the UI sidebar.
+        在 UI 侧边栏中控制页面的选择和删除。
+        """
         _set_button_style()
         self._build_sidebar_tabs()
 
@@ -642,7 +645,10 @@ class MultipageChatbotApp(AbstractMultipageApp):
                     self.selected_page.chat_obj = WebAppChat.from_dict(new_configs)
 
     def render(self, **kwargs):
-        """Renders the multipage chatbot app in the  UI according to the selected page."""
+        """
+        Renders the multipage chatbot app in the  UI according to the selected page.
+        根据所选页面在 UI 中呈现多页聊天机器人应用程序。
+        """
         with st.sidebar:
             _left_col, centre_col, _right_col = st.columns([0.33, 0.34, 0.33])
             with centre_col:
@@ -669,19 +675,22 @@ class MultipageChatbotApp(AbstractMultipageApp):
             self.sidebar_tabs = {"chats": tab1_visible_container, "settings": tab2}
             with tab1_visible_container:
                 left, center, right = st.columns(3)
-                with left:
-                    # Add button to show the costs table
-                    st.toggle(
-                        key="toggle_show_costs",
-                        label=":moneybag:",
-                        help="Show estimated token usage and associated costs",
-                    )
+                # with left:
+                #     # Add button to show the costs table
+                #     st.toggle(
+                #         key="toggle_show_costs",
+                #         label=":moneybag:",
+                #         help="Show estimated token usage and associated costs",
+                #     )
                 with center:
                     # Add button to toggle voice output
+                    # 添加按钮来切换语音输出
                     speaking_head_in_silhouette = "\U0001F5E3"
+                    #
                     st.toggle(
                         key="toggle_voice_output",
                         label=speaking_head_in_silhouette,
+                        # label="允许助理说话",
                         help="Allow the assistant to speak",
                         value=True,
                     )
@@ -809,7 +818,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
         st 页面配置模型选择
         '''
         updates_to_chat_configs = {}
-        logger.info('current_chat_configs {}, model_fields {}', current_chat_configs, model_fields)
+        # logger.info('current_chat_configs {}, model_fields {}', current_chat_configs, model_fields)
         for field_name, field in model_fields.items():
             extra_info = field.json_schema_extra or {}
 
