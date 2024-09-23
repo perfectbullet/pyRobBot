@@ -172,7 +172,8 @@ class TextToSpeech(SpeechAndTextConfigs):
         """Return the speech from the text."""
         print('speech, speech, speech, speech, speech, speech, ')
         if not self._speech:
-            self._speech = self._tts()
+            # self._speech = self._tts()
+            self._speech = self._tts_openai()
         return self._speech
 
     def set_sample_rate(self, sample_rate: int):
@@ -180,13 +181,13 @@ class TextToSpeech(SpeechAndTextConfigs):
         logger.info('sample_rate is {}'.format(sample_rate))
         self._speech = self.speech.set_frame_rate(sample_rate)
 
-    def _tts(self):
-        logger.info("Running {} TTS on text '{}'", self.engine, self.text)
-        # rtn = self._tts_openai() if self.engine == "openai" else self._tts_google()
-        rtn = self._tts_openai()
-        logger.info("Done with TTS for '{}'", self.text)
-
-        return rtn
+    # def _tts(self):
+    #     logger.info("Running {} TTS on text '{}'", self.engine, self.text)
+    #     # rtn = self._tts_openai() if self.engine == "openai" else self._tts_google()
+    #     rtn = self._tts_openai()
+    #     logger.info("Done with TTS for '{}'", self.text)
+    #
+    #     return rtn
 
     # def _tts_openai(self) -> AudioSegment:
     #     """Convert text to speech using OpenAI's TTS. Return an AudioSegment object."""
@@ -219,14 +220,16 @@ class TextToSpeech(SpeechAndTextConfigs):
     #     return audio
 
     def _tts_openai(self) -> AudioSegment:
-        """Convert text to speech using OpenAI's TTS. Return an AudioSegment object."""
-        openai_tts_model = "tts-1"
+        """
+            Convert text to speech using OpenAI's TTS. Return an AudioSegment object.
+            使用 OpenAI 的 TTS 将文本转换为语音。返回 AudioSegment 对象。
+        """
+        # openai_tts_model = "tts-1"
         response = tts_request(self.text, 1018, emotivoice_url, prompt='开心')
         mp3_buffer = io.BytesIO(response.content)
         # for mp3_stream_chunk in response.iter_bytes(chunk_size=4096):
         #     mp3_buffer.write(mp3_stream_chunk)
         mp3_buffer.seek(0)
-
         audio = AudioSegment.from_mp3(mp3_buffer)
         audio += 8  # Increase volume a bit
         # logger.info('audio is {}'.format(audio))
