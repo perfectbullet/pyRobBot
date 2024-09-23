@@ -74,7 +74,9 @@ class AsyncReplier:
         )
 
     def play_queued_audios(self):
-        """Play queued audio segments."""
+        """
+            Play queued audio segments.
+        """
         while True:
             try:
                 logger.debug(
@@ -88,14 +90,15 @@ class AsyncReplier:
                     self.chat_obj.play_speech_queue.task_done()
                     break
 
-                logger.debug("Playing audio reply chunk ({}s)", audio.duration_seconds)
+                logger.info("Playing audio reply chunk ({}s)", audio.duration_seconds)
                 self.app_page.render_custom_audio_player(
                     audio,
                     parent_element=self.app_page.status_msg_container,
-                    autoplay=True,
-                    hidden=True,
+                    # 是否自动播放
+                    autoplay=False,
+                    hidden=False,
                 )
-                logger.debug(
+                logger.info(
                     "Done playing audio reply chunk ({}s)", audio.duration_seconds
                 )
                 self.chat_obj.play_speech_queue.task_done()
@@ -151,7 +154,7 @@ class AsyncReplier:
             self.app_page.render_custom_audio_player(
                 full_audio_fpath, parent_element=audio_reply_container, autoplay=False
             )
-        # 将标志设为False
+        # 将标志设为 False
         self.chat_obj.update_audio_history_ok.clear()
         return {"text": full_response, "audio": full_audio_fpath}
 

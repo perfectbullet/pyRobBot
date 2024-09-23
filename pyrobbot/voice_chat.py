@@ -73,6 +73,7 @@ class VoiceChat(Chat):
         # 2. Converting assistant's text reply to speech and playing it
         self.tts_conversion_queue = queue.Queue()
         self.play_speech_queue = queue.Queue()
+        # tts_conversion_watcher_thread  start at   app_utils.py
         self.tts_conversion_watcher_thread = threading.Thread(
             target=self.handle_tts_conversion_queue,
             args=(self.tts_conversion_queue,),

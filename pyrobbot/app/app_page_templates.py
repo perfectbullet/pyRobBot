@@ -139,7 +139,9 @@ class AppPage(ABC):
         autoplay: bool = True,
         hidden=False,
     ):
-        """Autoplay an audio segment in the streamlit app."""
+        """
+            Autoplay an audio segment in the streamlit app.
+        """
         # Adaped from: <https://discuss.streamlit.io/t/
         #    how-to-play-an-audio-file-automatically-generated-using-text-to-speech-
         #    in-streamlit/33201/2>
@@ -299,10 +301,12 @@ class ChatBotPage(AppPage):
         )
 
     def render_title(self):
-        """Render the title of the chatbot page."""
+        """
+            Render the title of the chatbot page
+        """
         with st.container(height=145, border=False):
             self.title_container = st.empty()
-            self.title_container.subheader(self.title, divider="rainbow")
+            self.title_container.subheader(self.title + '1215', divider="rainbow")
             left, _ = st.columns([0.7, 0.3])
             with left:
                 self.status_msg_container = st.empty()
