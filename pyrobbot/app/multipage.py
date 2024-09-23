@@ -64,7 +64,6 @@ def get_ollama_model_list_by_api():
     return ollama_model_list
 
 
-
 @st.cache_resource(show_spinner="Initialising listening engine...")
 def listen():  # noqa: PLR0912, PLR0915
     """Listen for speech from the browser."""
