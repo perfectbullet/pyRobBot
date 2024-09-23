@@ -78,11 +78,13 @@ class VoiceChat(Chat):
             args=(self.tts_conversion_queue,),
             daemon=True,
         )
-        self.play_speech_thread = threading.Thread(
-            target=self.handle_play_speech_queue,
-            args=(self.play_speech_queue,),
-            daemon=True,
-        )  # TODO: Do not start this in webchat
+
+        # self.play_speech_thread = threading.Thread(
+        #     target=self.handle_play_speech_queue,
+        #     args=(self.play_speech_queue,),
+        #     daemon=True,
+        # )  # TODO: Do not start this in webchat
+        
         # 3. Watching for expressions that cancel the reply or exit the chat
         self.check_for_interrupt_expressions_queue = queue.Queue()
         self.check_for_interrupt_expressions_thread = threading.Thread(
@@ -104,13 +106,16 @@ class VoiceChat(Chat):
 
     @property
     def mixer(self):
-        """Return the mixer object."""
+        """
+            Return the mixer object.
+        """
         mixer = getattr(self, "_mixer", None)
         if mixer is not None:
             return mixer
 
         self._mixer = pygame.mixer
         try:
+            logger.info('self.mixer.init')
             self.mixer.init(
                 frequency=self.sample_rate, channels=1, buffer=self.block_size
             )
@@ -122,58 +127,63 @@ class VoiceChat(Chat):
             logger.warning("Voice chat may not be available or may not work as expected.")
         return self._mixer
 
-    def start(self):
-        """Start the chat."""
-        # ruff: noqa: T201
-        self.tts_conversion_watcher_thread.start()
-        self.play_speech_thread.start()
-        if not self.skip_initial_greeting:
-            tts_entry = {"exchange_id": self.id, "text": self.initial_greeting}
-            self.tts_conversion_queue.put(tts_entry)
-            while self._assistant_still_replying():
-                pygame.time.wait(50)
-        self.questions_listening_watcher_thread.start()
-        self.check_for_interrupt_expressions_thread.start()
-        self.handle_update_audio_history_thread.start()
-
-        with contextlib.suppress(KeyboardInterrupt, EOFError):
-            while not self.exit_chat.is_set():
-                self.tts_conversion_queue.join()
-                self.play_speech_queue.join()
-                self.current_answer_audios_queue.join()
-
-                if self.interrupt_reply.is_set():
-                    logger.opt(colors=True).debug(
-                        "<yellow>Interrupting the reply</yellow>"
-                    )
-                    with self.check_for_interrupt_expressions_queue.mutex:
-                        self.check_for_interrupt_expressions_queue.queue.clear()
-                    with contextlib.suppress(pygame.error):
-                        self.mixer.stop()
-                    with self.questions_queue.mutex:
-                        self.questions_queue.queue.clear()
-                    chime.theme("material")
-                    chime.error()
-                    chime.theme(self.default_chime_theme)
-                    time.sleep(0.25)
-
-                chime.warning()
-                self.interrupt_reply.clear()
-                logger.debug(f"{self.assistant_name}> Waiting for user input...")
-                question = self.questions_queue.get()
-                self.questions_queue.task_done()
-
-                if question is None:
-                    self.exit_chat.set()
-                else:
-                    chime.success()
-                    for chunk in self.answer_question(question):
-                        if chunk.chunk_type == "code":
-                            print(chunk.content, end="", flush=True)
-
-        self.exit_chat.set()
-        chime.info()
-        logger.info("Leaving chat")
+    # 这里看起来似乎没用上
+    # def start(self):
+    #     """
+    #         Start the chat.
+    #     """
+    #     # ruff: noqa: T201
+    #     self.tts_conversion_watcher_thread.start()
+    #     # self.play_speech_thread.start()
+    #     print('handle_play_speech_queue start ')
+    #
+    #     if not self.skip_initial_greeting:
+    #         tts_entry = {"exchange_id": self.id, "text": self.initial_greeting}
+    #         self.tts_conversion_queue.put(tts_entry)
+    #         while self._assistant_still_replying():
+    #             pygame.time.wait(50)
+    #     self.questions_listening_watcher_thread.start()
+    #     self.check_for_interrupt_expressions_thread.start()
+    #     self.handle_update_audio_history_thread.start()
+    #
+    #     with contextlib.suppress(KeyboardInterrupt, EOFError):
+    #         while not self.exit_chat.is_set():
+    #             self.tts_conversion_queue.join()
+    #             self.play_speech_queue.join()
+    #             self.current_answer_audios_queue.join()
+    #
+    #             if self.interrupt_reply.is_set():
+    #                 logger.opt(colors=True).debug(
+    #                     "<yellow>Interrupting the reply</yellow>"
+    #                 )
+    #                 with self.check_for_interrupt_expressions_queue.mutex:
+    #                     self.check_for_interrupt_expressions_queue.queue.clear()
+    #                 with contextlib.suppress(pygame.error):
+    #                     self.mixer.stop()
+    #                 with self.questions_queue.mutex:
+    #                     self.questions_queue.queue.clear()
+    #                 chime.theme("material")
+    #                 chime.error()
+    #                 chime.theme(self.default_chime_theme)
+    #                 time.sleep(0.25)
+    #
+    #             chime.warning()
+    #             self.interrupt_reply.clear()
+    #             logger.debug(f"{self.assistant_name}> Waiting for user input...")
+    #             question = self.questions_queue.get()
+    #             self.questions_queue.task_done()
+    #
+    #             if question is None:
+    #                 self.exit_chat.set()
+    #             else:
+    #                 chime.success()
+    #                 for chunk in self.answer_question(question):
+    #                     if chunk.chunk_type == "code":
+    #                         print(chunk.content, end="", flush=True)
+    #
+    #     self.exit_chat.set()
+    #     chime.info()
+    #     logger.info("Leaving chat")
 
     def answer_question(self, question: str):
         """Answer a question."""
@@ -272,7 +282,10 @@ class VoiceChat(Chat):
             self.update_audio_history_ok.set()
 
     def speak(self, tts: TextToSpeech):
-        """Reproduce audio from a pygame Sound object."""
+        """
+            Reproduce audio from a pygame Sound object.
+        """
+        logger.info('tts is {}', tts)
         tts.set_sample_rate(self.sample_rate)
         self.mixer.Sound(tts.speech.raw_data).play()
         audio_recorded_while_assistant_replies = self.listen(
@@ -438,10 +451,14 @@ class VoiceChat(Chat):
                 logger.error(error)
 
     def handle_play_speech_queue(self, play_speech_queue: queue.Queue[TextToSpeech]):
-        """Handle the queue of audio segments to be played."""
+        """
+            Handle the queue of audio segments to be played.
+        """
+        print('play_speech_queue type is {}', type(play_speech_queue))
         while not self.exit_chat.is_set():
             try:
                 play_speech_queue_item = play_speech_queue.get()
+                print('play_speech_queue_item type is {}', type(play_speech_queue_item))
                 if play_speech_queue_item["speech"] and not self.interrupt_reply.is_set():
                     self.speak(play_speech_queue_item["tts_obj"])
             except Exception as error:  # noqa: BLE001, PERF203
@@ -450,7 +467,9 @@ class VoiceChat(Chat):
                 play_speech_queue.task_done()
 
     def handle_tts_conversion_queue(self, tts_conversion_queue: queue.Queue):
-        """Handle the text-to-speech queue."""
+        """
+            Handle the text-to-speech queue.
+        """
         logger.info("Chat {}: TTS conversion handler started.", self.id)
         while not self.exit_chat.is_set():
             try:
@@ -523,7 +542,10 @@ class VoiceChat(Chat):
         return directory
 
     def _assistant_still_replying(self):
-        """Check if the assistant is still talking."""
+        """
+            Check if the assistant is still talking.
+        """
+        logger.info('Check if the assistant is still talking.')
         return (
             self.mixer.get_busy()
             or self.questions_queue.unfinished_tasks > 0
