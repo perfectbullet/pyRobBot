@@ -19,7 +19,9 @@ class BaseConfigModel(BaseModel, extra="forbid"):
 
     @classmethod
     def get_allowed_values(cls, field: str):
-        """Return a tuple of allowed values for `field`."""
+        """
+        Return a tuple of allowed values for `field`.
+        """
         annotation = cls._get_field_param(field=field, param="annotation")
         if isinstance(annotation, type(Literal[""])):
             return get_args(annotation)

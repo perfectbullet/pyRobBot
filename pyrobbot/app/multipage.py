@@ -42,6 +42,29 @@ text_prompt_queue = queue.Queue()
 reply_ongoing = threading.Event()
 
 
+import sys
+import time
+
+import requests
+
+os.environ["HTTP_PROXY"] = ''
+os.environ["HTTPS_PROXY"] = ''
+os.environ["all_proxy"] = ''
+os.environ["ALL_PROXY"] = ''
+ollama_tags_url = 'http://127.0.0.1:11434/api/tags'
+
+
+def get_ollama_model_list_by_api():
+    '''
+    api 获取ollama模型列表
+    '''
+    res = requests.get(ollama_tags_url).json()
+    models: list = res.get('models', [])
+    ollama_model_list = [model_info['name'].split(':')[0] for model_info in models]
+    return ollama_model_list
+
+
+
 @st.cache_resource(show_spinner="Initialising listening engine...")
 def listen():  # noqa: PLR0912, PLR0915
     """Listen for speech from the browser."""
@@ -589,6 +612,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
         self._build_sidebar_tabs()
 
         with self.sidebar_tabs["settings"]:
+            #
             caption = f"\u2699\uFE0F {self.selected_page.title}"
             st.caption(caption)
             current_chat_configs = self.selected_page.chat_obj.configs
@@ -599,6 +623,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
             field_names = list(dict.fromkeys(field_names))
             model_fields = {k: VoiceChatConfigs.model_fields[k] for k in field_names}
             # logger.info('model_fields is {}', model_fields)
+            # 更新模型配置到页面
             updates_to_chat_configs = self._handle_chat_configs_value_selection(
                 current_chat_configs, model_fields
             )
@@ -781,7 +806,11 @@ class MultipageChatbotApp(AbstractMultipageApp):
                     )
 
     def _handle_chat_configs_value_selection(self, current_chat_configs, model_fields):
+        '''
+        st 页面配置模型选择
+        '''
         updates_to_chat_configs = {}
+        logger.info('current_chat_configs {}, model_fields {}', current_chat_configs, model_fields)
         for field_name, field in model_fields.items():
             extra_info = field.json_schema_extra or {}
 
@@ -790,7 +819,12 @@ class MultipageChatbotApp(AbstractMultipageApp):
                 continue
 
             title = field_name.replace("_", " ").title()
-            choices = VoiceChatConfigs.get_allowed_values(field=field_name)
+            if field_name != 'model':
+
+                choices = VoiceChatConfigs.get_allowed_values(field=field_name)
+            else:
+                # 修改model下拉选项数据
+                choices = get_ollama_model_list_by_api()
             description = VoiceChatConfigs.get_description(field=field_name)
             field_type = VoiceChatConfigs.get_type(field=field_name)
 
