@@ -629,10 +629,14 @@ class MultipageChatbotApp(AbstractMultipageApp):
             updates_to_chat_configs = self._handle_chat_configs_value_selection(
                 current_chat_configs, model_fields
             )
+            logger.info('current_chat_configs is {}', current_chat_configs)
+            logger.info('model_fields is {}', model_fields)
             if updates_to_chat_configs:
                 current_chat_configs = self.selected_page.chat_obj.configs.copy()
                 new_configs = current_chat_configs.model_dump()
+                logger.info('new_configs1 is {}', new_configs)
                 new_configs.update(updates_to_chat_configs)
+                logger.info('new_configs2 is {}', new_configs)
                 new_configs = self.selected_page.chat_obj.configs.model_validate(
                     new_configs
                 )
