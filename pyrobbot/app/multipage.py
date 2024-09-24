@@ -927,9 +927,10 @@ class MultipageChatbotApp(AbstractMultipageApp):
                     args=[element_key],
                 )
                 new_field_value = tuple(new_field_value.strip().split("\n"))
+                logger.info('new_field_value: {}', new_field_value)
             else:
                 continue
-
+            logger.info('new_field_value: {}, current_config_value: {}', new_field_value, current_config_value)
             if new_field_value != current_config_value:
                 updates_to_chat_configs[field_name] = new_field_value
 
