@@ -631,6 +631,7 @@ class MultipageChatbotApp(AbstractMultipageApp):
             )
             logger.info('current_chat_configs is {}', current_chat_configs)
             logger.info('model_fields is {}', model_fields)
+            logger.info('updates_to_chat_configs is {}', updates_to_chat_configs)
             if updates_to_chat_configs:
                 current_chat_configs = self.selected_page.chat_obj.configs.copy()
                 new_configs = current_chat_configs.model_dump()
