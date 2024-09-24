@@ -12,7 +12,8 @@ from pydantic import BaseModel, Field
 
 from . import GeneralDefinitions
 # from .tokens import PRICE_PER_K_TOKENS_EMBEDDINGS, PRICE_PER_K_TOKENS_LLM
-from .tokens import PRICE_PER_K_TOKENS_LLM
+# from .tokens import PRICE_PER_K_TOKENS_LLM
+
 
 class BaseConfigModel(BaseModel, extra="forbid"):
     """Base model for configuring options."""
@@ -152,7 +153,10 @@ class ChatOptions(OpenAiApiCallOptions):
     #     ),
     #     json_schema_extra={"frozen": True},
     # )
-    context_model: str = Field('full-history', description='Model to use for chat context (~memory).Once picked, it cannot be changed.')
+    context_model: str = Field(
+        'full-history',
+        description='Model to use for chat context (~memory).Once picked, it cannot be changed.'
+    )
     initial_greeting: Optional[str] = Field(
         default="", description="Initial greeting given by the assistant"
     )

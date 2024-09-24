@@ -629,15 +629,13 @@ class MultipageChatbotApp(AbstractMultipageApp):
             updates_to_chat_configs = self._handle_chat_configs_value_selection(
                 current_chat_configs, model_fields
             )
-            logger.info('current_chat_configs is {}', current_chat_configs)
-            logger.info('model_fields is {}', model_fields)
-            logger.info('updates_to_chat_configs is {}', updates_to_chat_configs)
+            # logger.info('current_chat_configs is {}', current_chat_configs)
+            # logger.info('model_fields is {}', model_fields)
+            # logger.info('updates_to_chat_configs is {}', updates_to_chat_configs)
             if updates_to_chat_configs:
                 current_chat_configs = self.selected_page.chat_obj.configs.copy()
                 new_configs = current_chat_configs.model_dump()
-                logger.info('new_configs1 is {}', new_configs)
                 new_configs.update(updates_to_chat_configs)
-                logger.info('new_configs2 is {}', new_configs)
                 new_configs = self.selected_page.chat_obj.configs.model_validate(
                     new_configs
                 )
@@ -833,7 +831,6 @@ class MultipageChatbotApp(AbstractMultipageApp):
 
             title = field_name.replace("_", " ").title()
             if field_name != 'model':
-
                 choices = VoiceChatConfigs.get_allowed_values(field=field_name)
             else:
                 # 修改model下拉选项数据
@@ -927,10 +924,11 @@ class MultipageChatbotApp(AbstractMultipageApp):
                     args=[element_key],
                 )
                 new_field_value = tuple(new_field_value.strip().split("\n"))
-                logger.info('new_field_value: {}', new_field_value)
+                # logger.info('new_field_value: {}', new_field_value)
             else:
                 continue
-            logger.info('field_type: {}, field_name: {}, new_field_value: {}, current_config_value: {}', field_type, field_name, new_field_value, current_config_value)
+            # logger.info('field_type: {}, field_name: {}, new_field_value: {}, current_config_value: {}',
+            # field_type, field_name, new_field_value, current_config_value)
             if new_field_value != current_config_value:
                 updates_to_chat_configs[field_name] = new_field_value
 
