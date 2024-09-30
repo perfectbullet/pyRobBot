@@ -32,6 +32,8 @@ class BaseConfigModel(BaseModel, extra="forbid"):
     def get_type(cls, field: str):
         """Return type of `field`."""
         type_hint = typing.get_type_hints(cls)[field]
+        if field == 'ai_instructions':
+            return tuple
         if isinstance(type_hint, type):
             if isinstance(type_hint, types.GenericAlias):
                 return get_origin(type_hint)
@@ -138,7 +140,7 @@ class ChatOptions(OpenAiApiCallOptions):
         default=f"{GeneralDefinitions.PACKAGE_NAME}_system",
         description="Name of the chat's system",
     )
-    ai_instructions = Field(
+    ai_instructions: tuple[str, ...] = Field(
         default=(
             "You answer correctly.",
             "You do not lie or make up information unless explicitly asked to do so.",
