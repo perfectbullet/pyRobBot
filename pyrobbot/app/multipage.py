@@ -653,9 +653,9 @@ class MultipageChatbotApp(AbstractMultipageApp):
         根据所选页面在 UI 中呈现多页聊天机器人应用程序。
         """
         with st.sidebar:
-            _left_col, centre_col, _right_col = st.columns([0.33, 0.34, 0.33])
+            _left_col, centre_col, _right_col = st.columns([0.1, 0.8, 0.1])
             with centre_col:
-                st.title('观想科技AI')
+                st.title('观想科技软件部')
                 with contextlib.suppress(AttributeError, ValueError, OSError):
                     # st image raises some exceptions occasionally
                     avatars = get_avatar_images()
@@ -673,18 +673,12 @@ class MultipageChatbotApp(AbstractMultipageApp):
 
             with tab1:
                 tab1_visible_container = st.container()
-                tab1_invisible_container = st.container(height=0, border=False)
+                # tab1_invisible_container = st.container(height=0, border=False)
+                tab1_invisible_container = st.container(height=0)
 
             self.sidebar_tabs = {"chats": tab1_visible_container, "settings": tab2}
             with tab1_visible_container:
-                left, center, right = st.columns(3)
-                # with left:
-                #     # Add button to show the costs table
-                #     st.toggle(
-                #         key="toggle_show_costs",
-                #         label=":moneybag:",
-                #         help="Show estimated token usage and associated costs",
-                #     )
+                center, right = st.columns(2)
                 with center:
                     # Add button to toggle voice output
                     # 添加按钮来切换语音输出
