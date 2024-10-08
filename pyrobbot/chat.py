@@ -248,7 +248,7 @@ class Chat(AlternativeConstructors):
         Return the initial greeting for the chat.
         返回聊天的初始问候语。
         """
-        default_greeting = "我是Rob，一名AI助手，旨在帮助zhoujing决问题和回答问题。"
+        default_greeting = "我是Rob，一名AI助手，旨在帮助ru a |njianb 决问题和回答问题。"
         # default_greeting = f"Hi! I'm {self.assistant_name}. How can I assist you?"
         logger.info('default_greeting is {}', default_greeting)
         with contextlib.suppress(AttributeError):
