@@ -12,7 +12,7 @@ Answer: Let's think step by step."""
 
 prompt = ChatPromptTemplate.from_template(template)
 
-model = OllamaLLM(model="llama3", base_url='http://125.69.16.175:11434/v1')
+model = OllamaLLM(model="qwen2.5:14b", base_url='http://125.69.16.175:11434')
 
 chain = prompt | model
 
