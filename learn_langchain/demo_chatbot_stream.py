@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     prompt_template = ChatPromptTemplate.from_messages([
         ('system', template),
-        # ('user', '{text}')
+        ('user', '{text}')
     ])
 
     model = OllamaLLM(model="qwen2.5:14b", base_url='http://125.69.16.175:11434')
